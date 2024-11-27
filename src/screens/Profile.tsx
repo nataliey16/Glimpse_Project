@@ -4,9 +4,11 @@ import AppLayout from '../layout/AppLayout';
 
 function Profile(): React.JSX.Element {
   return (
-    <View>
-      <Text>Profile</Text>
-    </View>
+    <AppLayout>
+      <View>
+        <Text>Profile</Text>
+      </View>
+    </AppLayout>
   );
 }
 

@@ -7,7 +7,10 @@ const BoardStack = createNativeStackNavigator();
 
 function CreateBoardStackNav(): React.JSX.Element {
   return (
-    <BoardStack.Navigator>
+    <BoardStack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}>
       <BoardStack.Screen
         name="CreateBoard"
         component={CreateBoard}></BoardStack.Screen>

@@ -6,7 +6,10 @@ const ProfileStack = createNativeStackNavigator();
 
 function ProfileStackNav(): React.JSX.Element {
   return (
-    <ProfileStack.Navigator>
+    <ProfileStack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}>
       <ProfileStack.Screen
         name="Your Profile"
         component={Profile}></ProfileStack.Screen>

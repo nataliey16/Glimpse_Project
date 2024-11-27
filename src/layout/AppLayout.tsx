@@ -1,6 +1,6 @@
 import React, {Children} from 'react';
-import {View, Text} from 'react-native';
-import Header from '../Main';
+import {View, Text, StyleSheet} from 'react-native';
+import Header from '../components/Header';
 
 type AppLayoutParamsType = {
   children: React.JSX.Element;
@@ -10,11 +10,9 @@ function AppLayout(params: AppLayoutParamsType): React.JSX.Element {
   const {children} = params;
   return (
     <View>
+      <Header />
       <View>
-        <Text>Hello</Text>
-      </View>
-      <View>
-        <Text>{children}</Text>
+        <Text style={style.txtFont}>{children}</Text>
       </View>
       <View>
         <Text>Footer</Text>
@@ -22,5 +20,11 @@ function AppLayout(params: AppLayoutParamsType): React.JSX.Element {
     </View>
   );
 }
+
+const style = StyleSheet.create({
+  txtFont: {
+    fontFamily: 'montserrat',
+  },
+});
 
 export default AppLayout;

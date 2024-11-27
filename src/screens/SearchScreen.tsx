@@ -1,11 +1,14 @@
 import React from 'react';
 import {Text, View} from 'react-native';
+import AppLayout from '../layout/AppLayout';
 
 function SearchScreen(): React.JSX.Element {
   return (
-    <View>
-      <Text>SearchScreen</Text>
-    </View>
+    <AppLayout>
+      <View>
+        <Text>SearchScreen</Text>
+      </View>
+    </AppLayout>
   );
 }
 

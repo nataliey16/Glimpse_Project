@@ -6,7 +6,10 @@ const SearchStack = createNativeStackNavigator();
 
 function SearchStackNav(): React.JSX.Element {
   return (
-    <SearchStack.Navigator>
+    <SearchStack.Navigator
+      screenOptions={{
+        headerShown: false,
+      }}>
       <SearchStack.Screen
         name="Your Search"
         component={SearchScreen}></SearchStack.Screen>
