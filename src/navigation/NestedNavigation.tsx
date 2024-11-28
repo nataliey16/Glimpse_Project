@@ -37,6 +37,7 @@ function NestedNavigation(): React.JSX.Element {
             tabBarStyle: styles.tabBarStyle,
             tabBarShowLabel: false, // Hides the tab labels
             headerShown: false,
+            tabBarActiveTintColor: '#C3CFFA',
           })}>
           <NestedNav.Screen
             name="Home"
