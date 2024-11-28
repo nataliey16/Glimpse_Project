@@ -10,17 +10,12 @@ type TabIconParams = {
 
 function TabIcon(params: TabIconParams): React.JSX.Element {
   const routeName = params.route;
-  const iconSize = params.size;
-  const iconColor = params.color;
   const isFocused = params.focused;
-  const tintColor = params.color;
+  //   const iconColor = params.color;
+  //   const tintColor = params.color;
 
   return (
-    <View
-      style={[
-        style.iconView,
-        // {borderWidth: 1, borderColor: isFocused ? tintColor : '#FFF'},
-      ]}>
+    <View style={[style.iconView]}>
       <Image
         style={style.iconImg}
         source={

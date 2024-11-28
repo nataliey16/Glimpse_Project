@@ -3,13 +3,13 @@ import {StyleSheet, Text, View} from 'react-native';
 
 function Header(): React.JSX.Element {
   return (
-    <View style={styles.headerView}>
-      <Text style={styles.headerTxt}>GLIMPSE</Text>
+    <View style={style.headerView}>
+      <Text style={style.headerTxt}>GLIMPSE</Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const style = StyleSheet.create({
   headerView: {
     justifyContent: 'center',
     alignItems: 'center',
