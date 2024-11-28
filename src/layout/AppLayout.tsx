@@ -10,19 +10,41 @@ type AppLayoutParamsType = {
 function AppLayout(params: AppLayoutParamsType): React.JSX.Element {
   const {children} = params;
   return (
-    <View style={{flex: 1}}>
-      <Header />
-      <View>
-        <Text style={style.txtFont}>{children}</Text>
+    <View style={styles.container}>
+      {/* Persistent Header */}
+      <View style={styles.headerContainer}>
+        <Header />
       </View>
-      <Footer />
+
+      {/* Page Content */}
+      <View style={styles.contentContainer}>{children}</View>
+
+      {/* Persistent Footer (Optional) */}
+      <View style={styles.footerContainer}>
+        <Footer />
+      </View>
     </View>
   );
 }
 
-const style = StyleSheet.create({
-  txtFont: {
-    fontFamily: 'montserrat',
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    // backgroundColor: '#FFFFFF',
+  },
+  headerContainer: {
+    backgroundColor: '#C3CFFA',
+  },
+  contentContainer: {
+    flex: 1,
+  },
+  footerContainer: {
+    backgroundColor: '#C3CFFA',
+  },
+
+  headerText: {
+    fontSize: 30,
+    fontWeight: '200',
   },
 });
 

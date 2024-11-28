@@ -22,7 +22,7 @@ const style = StyleSheet.create({
     fontWeight: '300',
     fontFamily: 'montserrat',
     color: '#fff',
-    textShadowColor: '#9694FF',
+    textShadowColor: '#5856CB',
     textShadowOffset: {width: 1, height: 5},
     textShadowRadius: 10,
     borderColor: '#C3CFFA',

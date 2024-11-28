@@ -26,12 +26,7 @@ function NestedNavigation(): React.JSX.Element {
               size: number;
             }) => {
               return (
-                <TabIcon
-                  route={route.name}
-                  focused={focused}
-                  color={color}
-                  size={size}
-                />
+                <TabIcon route={route.name} focused={focused} color={color} />
               );
             },
             tabBarStyle: styles.tabBarStyle,
@@ -59,8 +54,6 @@ function NestedNavigation(): React.JSX.Element {
 const styles = StyleSheet.create({
   tabView: {
     flex: 1,
-    justifyContent: 'center',
-    alignContent: 'center',
   },
   tabBarStyle: {
     backgroundColor: '#3A3B45',
