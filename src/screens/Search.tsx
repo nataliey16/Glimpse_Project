@@ -2,7 +2,7 @@ import React from 'react';
 import {Text, View} from 'react-native';
 import AppLayout from '../layout/AppLayout';
 
-function SearchScreen(): React.JSX.Element {
+function SearchScreen({navigation}: {navigation: any}): React.JSX.Element {
   return (
     <AppLayout>
       <View>

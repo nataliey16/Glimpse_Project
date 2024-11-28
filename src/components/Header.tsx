@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
 
   headerTxt: {
     fontSize: 50,
-    fontWeight: '500',
+    fontWeight: '300',
     fontFamily: 'montserrat',
     color: '#fff',
     textShadowColor: '#9694FF',

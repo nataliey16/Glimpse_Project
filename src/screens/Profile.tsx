@@ -2,7 +2,7 @@ import React from 'react';
 import {Text, View} from 'react-native';
 import AppLayout from '../layout/AppLayout';
 
-function Profile(): React.JSX.Element {
+function Profile({navigation}: {navigation: any}): React.JSX.Element {
   return (
     <AppLayout>
       <View>

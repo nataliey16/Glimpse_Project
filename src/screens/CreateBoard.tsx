@@ -2,7 +2,7 @@ import React from 'react';
 import {Text, View} from 'react-native';
 import AppLayout from '../layout/AppLayout';
 
-function CreateBoard(): React.JSX.Element {
+function CreateBoard({navigation}: {navigation: any}): React.JSX.Element {
   return (
     <AppLayout>
       <View>

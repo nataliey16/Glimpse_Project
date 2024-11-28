@@ -3,7 +3,7 @@ import {StyleSheet, Text, View} from 'react-native';
 import AppLayout from '../layout/AppLayout';
 import {CommonStyles} from '../utils/CommonStyles';
 
-function Home(): React.JSX.Element {
+function Home({navigation}: {navigation: any}): React.JSX.Element {
   return (
     <AppLayout>
       <View style={CommonStyles.screens}>
