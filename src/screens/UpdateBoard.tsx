@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -6,68 +6,28 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
-import uuid from 'react-native-uuid';
 
-interface BoardDataEntry {
-  id: string;
-  name: string;
-  description: string;
-}
-
-function CreateBoard({
+function UpdateBoard({
   route,
   navigation,
 }: {
   route: any;
   navigation: any;
 }): React.JSX.Element {
-  // const [boardName, setBoardName] = useState('');
-  // const [boardDescription, setBoardDescription] = useState('');
-  const [boardForm, setBoardForm] = useState({
-    name: '',
-    description: '',
-  });
+  const {
+    boardName: initialBoardName,
+    boardDescription: initialBoardDescription,
+  } = route.params || {};
 
-  const getNewID = (): string => {
-    const id = String(uuid.v4());
-    console.log(`ID is : ${id}`);
-    return id;
-  };
-
-  const handleInputChange = (name: string, value: string) => {
-    console.log(
-      setBoardForm(prevEntry => ({
-        ...prevEntry,
-        [name]: value,
-      })),
-    );
-  };
-
-  const handleSubmit = () => {
-    if (!boardForm.name.trim() || !boardForm.description.trim()) {
-      console.log('Board name and description are required');
-      return;
-    }
-    const boardWithId: BoardDataEntry = {...boardForm, id: getNewID()};
-
-    console.log('Submitting board:', boardWithId);
-
-    navigation.navigate('Profile', {
-      screen: 'MyProfile',
-      params: {newSubmittedBoard: boardWithId},
-    });
-
-    setBoardForm({name: '', description: ''});
-  };
-
-  useEffect(() => {
-    console.log(boardForm);
-  }, [boardForm]);
+  const [boardName, setBoardName] = useState(initialBoardName || '');
+  const [boardDescription, setBoardDescription] = useState(
+    initialBoardDescription || '',
+  );
 
   return (
     <View style={style.board}>
       {/* Header */}
-      <Text style={style.boardTxt}>Create a</Text>
+      <Text style={style.boardTxt}>Update</Text>
       <Text style={style.boardTxt2}>Board</Text>
 
       {/* Board Name */}
@@ -76,10 +36,10 @@ function CreateBoard({
       </View>
       <TextInput
         style={style.inputBox}
-        placeholder="Name this Board"
+        placeholder="Name this board"
         placeholderTextColor="darkgrey"
-        value={boardForm.name}
-        onChangeText={value => handleInputChange('name', value)}
+        value={boardName}
+        onChangeText={setBoardName}
       />
 
       {/* Description of Board */}
@@ -90,8 +50,8 @@ function CreateBoard({
         style={style.inputBox2}
         placeholder="Dreams & Goals, Manifest your future self..."
         placeholderTextColor="darkgrey"
-        value={boardForm.description}
-        onChangeText={value => handleInputChange('description', value)}
+        value={boardDescription}
+        onChangeText={setBoardDescription}
         multiline
       />
 
@@ -101,27 +61,22 @@ function CreateBoard({
         <TouchableOpacity
           style={style.submitBtn}
           onPress={() => {
-            setBoardForm({name: '', description: ''});
-            //navigation.goBack();
+            navigation.goBack();
           }}>
           <Text style={style.submitBtnTxt}>Cancel</Text>
         </TouchableOpacity>
 
-        {/* Create Button */}
+        {/* Save Button */}
         <TouchableOpacity
           style={style.submitBtn}
-          onPress={
-            handleSubmit
-
-            // if (boardForm.name.trim() && boardForm.description.trim()) {
-            //   navigation.navigate('Profile', {
-            //     newBoard: {name: boardName, description: boardDescription},
-            //   });
-            // } else {
-            //   console.log('Board Name and Description are required.');
-            // }
-          }>
-          <Text style={style.submitBtnTxt}>Create</Text>
+          onPress={() => {
+            console.log('Board Updated:', boardName, boardDescription);
+            // Pass updated data back to Profile
+            navigation.navigate('Profile', {
+              updatedBoard: {name: boardName, description: boardDescription},
+            });
+          }}>
+          <Text style={style.submitBtnTxt}>Save</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -208,4 +163,4 @@ const style = StyleSheet.create({
   },
 });
 
-export default CreateBoard;
+export default UpdateBoard;
