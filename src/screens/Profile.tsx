@@ -89,26 +89,6 @@ function Profile({
           ))}
         </ScrollView>
       )}
-      {/* {newBoard.length === 0 ? (
-          <View style={style.createBoardSection}>
-            <Text style={style.createBoardText}>Create a Board</Text>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('Create Board')}>
-              <Image
-                source={require('../assets/icons/create.png')}
-                style={style.iconImg}
-              />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          newBoard.map((board, index) => (
-            <View key={index} style={style.boardCard}>
-              <Text style={style.boardName}>{board.name}</Text>
-              <Text style={style.boardDescription}>{board.description}</Text>
-            </View>
-          ))
-        )} */}
-      {/* </ScrollView> */}
     </View>
   );
 }

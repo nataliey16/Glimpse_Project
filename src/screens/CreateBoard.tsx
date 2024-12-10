@@ -21,8 +21,6 @@ function CreateBoard({
   route: any;
   navigation: any;
 }): React.JSX.Element {
-  // const [boardName, setBoardName] = useState('');
-  // const [boardDescription, setBoardDescription] = useState('');
   const [boardForm, setBoardForm] = useState({
     name: '',
     description: '',
@@ -108,19 +106,7 @@ function CreateBoard({
         </TouchableOpacity>
 
         {/* Create Button */}
-        <TouchableOpacity
-          style={style.submitBtn}
-          onPress={
-            handleSubmit
-
-            // if (boardForm.name.trim() && boardForm.description.trim()) {
-            //   navigation.navigate('Profile', {
-            //     newBoard: {name: boardName, description: boardDescription},
-            //   });
-            // } else {
-            //   console.log('Board Name and Description are required.');
-            // }
-          }>
+        <TouchableOpacity style={style.submitBtn} onPress={handleSubmit}>
           <Text style={style.submitBtnTxt}>Create</Text>
         </TouchableOpacity>
       </View>
