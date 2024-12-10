@@ -2,6 +2,7 @@ import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Profile from '../screens/Profile';
 import UpdateBoard from '../screens/UpdateBoard';
+import BoardDetails from '../screens/BoardDetails';
 
 const ProfileStack = createNativeStackNavigator();
 
@@ -12,6 +13,7 @@ function ProfileStackNav(): React.JSX.Element {
         headerShown: false, // Hides the header for all screens
       }}>
       <ProfileStack.Screen name="MyProfile" component={Profile} />
+      <ProfileStack.Screen name="BoardDetails" component={BoardDetails} />
       <ProfileStack.Screen
         name="UpdateBoard"
         component={UpdateBoard}
