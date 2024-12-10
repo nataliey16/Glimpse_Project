@@ -17,21 +17,6 @@ function BoardDetails({
   navigation: any;
   route: any;
 }): React.JSX.Element {
-  const [newBoard, setNewBoard] = useState<
-    {id: string; name: string; description: string}[]
-  >([]);
-
-  useEffect(() => {
-    if (route.params?.newSubmittedBoard) {
-      console.log('Received submitted board:', route.params.newSubmittedBoard);
-      setNewBoard(prevBoards => [
-        ...prevBoards,
-        route.params.newSubmittedBoard,
-      ]);
-      // navigation.setParams({newBoard: null}); // Clear params to avoid duplicate additions
-    }
-  }, [route.params?.newSubmittedBoard]);
-
   return (
     <View style={style.BoardDetailsBg}>
       {/* Edit Button */}
@@ -52,21 +37,6 @@ function BoardDetails({
           <Text style={style.userIntro}>Hello </Text>
         </View>
       </View>
-
-      {/* Content Section */}
-
-      {/* Render Images */}
-
-      <ScrollView style={style.scrollContainer}>
-        {newBoard.map(board => (
-          <Pressable key={board.id}>
-            <View style={style.boardCard}>
-              <Text style={style.boardName}>{board.name}</Text>
-              <Text style={style.boardDescription}>{board.description}</Text>
-            </View>
-          </Pressable>
-        ))}
-      </ScrollView>
     </View>
   );
 }

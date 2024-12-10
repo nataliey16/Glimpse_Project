@@ -20,8 +20,9 @@ function Profile({
   // const [boards, setBoards] = useState<{name: string; description: string}[]>(
   //   [],
   // );
+
   const [newBoard, setNewBoard] = useState<
-    {id: string; name: string; description: string}[]
+    {id: string; name: string; description: string; photoUrls: string[]}[]
   >([]);
 
   useEffect(() => {
@@ -88,6 +89,10 @@ function Profile({
               <View style={style.boardCard}>
                 <Text style={style.boardName}>{board.name}</Text>
                 <Text style={style.boardDescription}>{board.description}</Text>
+                <Text style={style.boardDescription}>{board.photoUrls}</Text>
+                {/* <View>
+                  <Image source={{board.photoUrls}} />
+                </View> */}
               </View>
             </Pressable>
           ))}
@@ -187,7 +192,12 @@ const style = StyleSheet.create({
   boardName: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
+  },
+  boardImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+    marginTop: 10,
   },
   boardDescription: {
     fontSize: 14,

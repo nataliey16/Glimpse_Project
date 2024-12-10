@@ -12,6 +12,7 @@ interface BoardDataEntry {
   id: string;
   name: string;
   description: string;
+  photoUrls: string;
 }
 
 function CreateBoard({
@@ -24,7 +25,11 @@ function CreateBoard({
   const [boardForm, setBoardForm] = useState({
     name: '',
     description: '',
+    photoUrls: '',
   });
+
+  const selectedPhoto = route.params?.selectedPhoto;
+  console.log(selectedPhoto);
 
   const getNewID = (): string => {
     const id = String(uuid.v4());
@@ -46,7 +51,12 @@ function CreateBoard({
       console.log('Board name and description are required');
       return;
     }
-    const boardWithId: BoardDataEntry = {...boardForm, id: getNewID()};
+
+    const boardWithId: BoardDataEntry = {
+      ...boardForm,
+      id: getNewID(),
+      photoUrls: selectedPhoto ? selectedPhoto.src.original : '',
+    };
 
     console.log('Submitting board:', boardWithId);
 
@@ -55,7 +65,7 @@ function CreateBoard({
       params: {newSubmittedBoard: boardWithId},
     });
 
-    setBoardForm({name: '', description: ''});
+    setBoardForm({name: '', description: '', photoUrls: ''});
   };
 
   useEffect(() => {
@@ -99,7 +109,7 @@ function CreateBoard({
         <TouchableOpacity
           style={style.submitBtn}
           onPress={() => {
-            setBoardForm({name: '', description: ''});
+            setBoardForm({name: '', description: '', photoUrls: ''});
             //navigation.goBack();
           }}>
           <Text style={style.submitBtnTxt}>Cancel</Text>

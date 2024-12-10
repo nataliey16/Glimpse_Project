@@ -7,7 +7,9 @@ interface MoodBoardModalProps {
   onClose: () => void;
   onSelectExistingBoard: () => void;
   onCreateNewBoard: () => void;
+  photo: any;
   navigation: any;
+  route: any;
 }
 
 const StoredInModal: React.FC<MoodBoardModalProps> = ({
@@ -15,7 +17,9 @@ const StoredInModal: React.FC<MoodBoardModalProps> = ({
   onClose,
   onSelectExistingBoard,
   onCreateNewBoard,
+  photo,
   navigation,
+  route,
 }) => {
   return (
     <Modal
@@ -42,13 +46,7 @@ const StoredInModal: React.FC<MoodBoardModalProps> = ({
           <TouchableOpacity
             style={styles.modalButton}
             onPress={onCreateNewBoard}>
-            <Text
-              style={styles.modalButtonText}
-              onPress={() =>
-                navigation.navigate('Create Board', {
-                  screen: 'CreateBoard',
-                })
-              }>
+            <Text style={styles.modalButtonText} onPress={onCreateNewBoard}>
               Create a Board
             </Text>
           </TouchableOpacity>

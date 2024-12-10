@@ -40,7 +40,7 @@ const PEXELS_API_FEATURED_URL =
   'https://api.pexels.com/v1/collections/featured';
 const PEXELS_API_GET_PHOTO_URL = 'https://api.pexels.com/v1/photos';
 
-const SearchScreen = ({navigation}: {navigation: any}) => {
+const SearchScreen = ({navigation, route}: {navigation: any; route: any}) => {
   const [keyword, setKeyword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -122,6 +122,7 @@ const SearchScreen = ({navigation}: {navigation: any}) => {
   const openPhotoModal = (photo: Photo) => {
     // console.log('Fetched photo:', photo);
     setSelectedPhoto(photo);
+    // console.log(photo);
     setModalVisible(true);
   };
 
@@ -133,6 +134,8 @@ const SearchScreen = ({navigation}: {navigation: any}) => {
   const addToMoodBoard = () => {
     // Alert.alert('Mood Board', 'Photo added to your Mood Board!');
     setShowBoardOptions(true);
+    console.log(selectedPhoto);
+
     // closePhotoModal();
   };
 
@@ -145,6 +148,10 @@ const SearchScreen = ({navigation}: {navigation: any}) => {
   const handleCreateNewBoard = () => {
     console.log('Create New Board');
     setShowBoardOptions(false);
+    navigation.navigate('Create Board', {
+      screen: 'CreateBoard',
+      params: {selectedPhoto},
+    });
     closePhotoModal();
   };
 
@@ -202,13 +209,15 @@ const SearchScreen = ({navigation}: {navigation: any}) => {
       )}
 
       {/* Stored In Modal */}
-      {showBoardOptions && (
+      {showBoardOptions && selectedPhoto && (
         <StoredInModal
           visible={showBoardOptions}
           onClose={handleCloseStoredInModal}
           onSelectExistingBoard={handleSelectExistingBoard}
           onCreateNewBoard={handleCreateNewBoard}
+          photo={selectedPhoto}
           navigation={navigation}
+          route={route}
         />
       )}
     </View>
