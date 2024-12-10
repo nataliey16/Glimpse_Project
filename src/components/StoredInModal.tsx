@@ -1,11 +1,13 @@
 import React from 'react';
-import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import {Modal, View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import {Screen} from 'react-native-screens';
 
 interface MoodBoardModalProps {
   visible: boolean;
   onClose: () => void;
   onSelectExistingBoard: () => void;
   onCreateNewBoard: () => void;
+  navigation: any;
 }
 
 const StoredInModal: React.FC<MoodBoardModalProps> = ({
@@ -13,30 +15,42 @@ const StoredInModal: React.FC<MoodBoardModalProps> = ({
   onClose,
   onSelectExistingBoard,
   onCreateNewBoard,
+  navigation,
 }) => {
   return (
     <Modal
       visible={visible}
       transparent={true}
       animationType="slide"
-      onRequestClose={onClose}
-    >
+      onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Stored In:</Text>
 
           <TouchableOpacity
             style={styles.modalButton}
-            onPress={onSelectExistingBoard}
-          >
-            <Text style={styles.modalButtonText}>Existing Board</Text>
+            onPress={onSelectExistingBoard}>
+            <Text
+              style={styles.modalButtonText}
+              onPress={() =>
+                navigation.navigate('Profile', {screen: 'MyProfile'})
+              }>
+              Existing Board
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.modalButton}
-            onPress={onCreateNewBoard}
-          >
-            <Text style={styles.modalButtonText}>Create a Board</Text>
+            onPress={onCreateNewBoard}>
+            <Text
+              style={styles.modalButtonText}
+              onPress={() =>
+                navigation.navigate('Create Board', {
+                  screen: 'CreateBoard',
+                })
+              }>
+              Create a Board
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>

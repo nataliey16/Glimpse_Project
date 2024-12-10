@@ -10,16 +10,13 @@ import {
   FlatList,
 } from 'react-native';
 
-function Profile({
+function BoardDetails({
   navigation,
   route,
 }: {
   navigation: any;
   route: any;
 }): React.JSX.Element {
-  // const [boards, setBoards] = useState<{name: string; description: string}[]>(
-  //   [],
-  // );
   const [newBoard, setNewBoard] = useState<
     {id: string; name: string; description: string}[]
   >([]);
@@ -36,69 +33,46 @@ function Profile({
   }, [route.params?.newSubmittedBoard]);
 
   return (
-    <View style={style.profileBg}>
+    <View style={style.BoardDetailsBg}>
       {/* Edit Button */}
       <TouchableOpacity
         onPress={() => {
-          console.log('Edit Profile');
+          console.log('Edit BoardDetails');
         }}>
         <Text style={style.editText}>Edit</Text>
       </TouchableOpacity>
 
-      {/* User Profile Section */}
+      {/* BoardDetails Section */}
       <View style={style.userPf}>
         <Image
           source={{uri: 'https://via.placeholder.com/100'}}
-          style={style.profileImage}
+          style={style.BoardDetailsImage}
         />
         <View style={style.textContainer}>
-          <Text style={style.userIntro}>Hi,</Text>
-          <Text style={style.userName}>Gabrielle!</Text>
+          <Text style={style.userIntro}>Hello </Text>
         </View>
       </View>
 
       {/* Content Section */}
-      <View style={style.profileText}>
-        {/* <ScrollView style={style.scrollContainer}> */}
-        <Text style={style.longContent}>
-          Your ideas, moods, and dreams all in one place.
-        </Text>
-        <Text style={style.moodTxt}>Mood Board</Text>
-      </View>
 
-      {/* Render Boards */}
-      {newBoard.length === 0 ? (
-        <View style={style.createBoardSection}>
-          <Text style={style.createBoardText}>Create a Board</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Create Board')}>
-            <Image
-              source={require('../assets/icons/create.png')}
-              style={style.iconImg}
-            />
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <ScrollView style={style.scrollContainer}>
-          {newBoard.map(board => (
-            <Pressable
-              key={board.id}
-              onPress={() => {
-                navigation.navigate('BoardDetails');
-              }}>
-              <View style={style.boardCard}>
-                <Text style={style.boardName}>{board.name}</Text>
-                <Text style={style.boardDescription}>{board.description}</Text>
-              </View>
-            </Pressable>
-          ))}
-        </ScrollView>
-      )}
+      {/* Render Images */}
+
+      <ScrollView style={style.scrollContainer}>
+        {newBoard.map(board => (
+          <Pressable key={board.id}>
+            <View style={style.boardCard}>
+              <Text style={style.boardName}>{board.name}</Text>
+              <Text style={style.boardDescription}>{board.description}</Text>
+            </View>
+          </Pressable>
+        ))}
+      </ScrollView>
     </View>
   );
 }
 
 const style = StyleSheet.create({
-  profileBg: {
+  BoardDetailsBg: {
     flex: 1,
     backgroundColor: '#F79D7D',
   },
@@ -108,13 +82,13 @@ const style = StyleSheet.create({
     marginTop: 20,
     marginLeft: 20,
   },
-  profileImage: {
+  BoardDetailsImage: {
     width: 100,
     height: 100,
     borderRadius: 20,
     marginRight: 10,
   },
-  profileText: {
+  BoardDetailsText: {
     marginTop: 20,
     marginLeft: 20,
   },
@@ -195,4 +169,4 @@ const style = StyleSheet.create({
   },
 });
 
-export default Profile;
+export default BoardDetails;
