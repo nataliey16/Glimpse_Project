@@ -1,5 +1,6 @@
 import React from 'react';
 import {Modal, View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import {Screen} from 'react-native-screens';
 
 interface MoodBoardModalProps {
   visible: boolean;
@@ -29,7 +30,13 @@ const StoredInModal: React.FC<MoodBoardModalProps> = ({
           <TouchableOpacity
             style={styles.modalButton}
             onPress={onSelectExistingBoard}>
-            <Text style={styles.modalButtonText}>Existing Board</Text>
+            <Text
+              style={styles.modalButtonText}
+              onPress={() =>
+                navigation.navigate('Profile', {screen: 'MyProfile'})
+              }>
+              Existing Board
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
