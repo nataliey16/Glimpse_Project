@@ -69,12 +69,18 @@ const {width, height} = Dimensions.get('window');
 const WelcomeModal = () => {
   const [modalVisible, setModalVisible] = useState(true);
 
+  const closeModal = () => {
+    setModalVisible(false);
+  };
+
   return (
     <Modal animationType="slide" visible={modalVisible} transparent={true}>
       <View style={style.modalOverlay}>
         <View style={style.modalContent}>
+          <TouchableOpacity style={style.closeButton} onPress={closeModal}>
+            <Text style={style.buttonText}>Close</Text>
+          </TouchableOpacity>
           <Text style={[style.headerText]}>Welcome to Glimpse</Text>
-
           <Text style={[style.subHeaderText]}>Create Your Vision</Text>
           <View style={[style.overlayText, style.instructionContent]}>
             <Text style={style.instructionText}>
@@ -119,9 +125,15 @@ const style = StyleSheet.create({
     alignItems: 'center',
     // position: 'relative',
   },
-
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    backgroundColor: '#F79D7D',
+    padding: 10,
+    borderRadius: 20,
+  },
   instructionContent: {
-    flex: 1,
     justifyContent: 'center',
     alignSelf: 'center',
     backgroundColor: '#fff',
@@ -138,6 +150,10 @@ const style = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center',
   },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+  },
   cardContainer: {
     flexDirection: 'row', // Creates two columns
     flexWrap: 'wrap',
@@ -152,15 +168,17 @@ const style = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: 150,
+    height: 130,
     borderRadius: 20,
   },
   overlayText: {
+    flex: 1,
+    top: 210,
     position: 'absolute',
-    textAlign: 'center',
     zIndex: 1, // text appears above the image
   },
   headerText: {
+    marginTop: 20,
     color: '#fff',
     fontSize: 30,
     fontWeight: 'bold',
@@ -171,7 +189,7 @@ const style = StyleSheet.create({
   subHeaderText: {
     fontSize: 25,
     fontWeight: 'medium',
-    paddingBottom: 10,
+    marginBottom: 20,
   },
 });
 
