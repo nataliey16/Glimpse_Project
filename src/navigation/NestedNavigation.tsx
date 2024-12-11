@@ -34,9 +34,9 @@ function NestedNavigation(): React.JSX.Element {
             headerShown: false,
             tabBarActiveTintColor: '#C3CFFA',
           })}>
-          {/* <NestedNav.Screen
+          <NestedNav.Screen
             name="Home"
-            component={HomeStackNav}></NestedNav.Screen> */}
+            component={HomeStackNav}></NestedNav.Screen>
           <NestedNav.Screen
             name="Search"
             component={SearchStackNav}></NestedNav.Screen>

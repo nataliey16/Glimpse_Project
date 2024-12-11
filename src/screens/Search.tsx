@@ -17,6 +17,7 @@ import PhotoCard from '../components/PhotoCard';
 import PhotoModal from '../components/PhotoModal';
 import StoredInModal from '../components/StoredInModal';
 import AppLayout from '../layout/AppLayout';
+import WelcomeModal from '../components/WelcomeModal';
 
 type Photo = {
   id: number;
@@ -167,6 +168,7 @@ const SearchScreen = ({navigation, route}: {navigation: any; route: any}) => {
   return (
     <AppLayout>
       <View style={styles.container}>
+        <WelcomeModal />
         <TextInput
           style={styles.input}
           placeholder="Search Photos..."
