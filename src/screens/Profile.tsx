@@ -70,7 +70,7 @@ function Profile({
       {/* Render Boards */}
       {newBoard.length === 0 ? (
         <View style={style.createBoardSection}>
-          <Text style={style.createBoardText}>Create a Board</Text>
+          <Text style={style.createBoardText}>Add photos to your board</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Search')}>
             <Image
               source={require('../assets/icons/create.png')}
