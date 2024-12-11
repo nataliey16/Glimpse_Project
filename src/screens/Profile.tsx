@@ -71,7 +71,7 @@ function Profile({
       {newBoard.length === 0 ? (
         <View style={style.createBoardSection}>
           <Text style={style.createBoardText}>Create a Board</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Create Board')}>
+          <TouchableOpacity onPress={() => navigation.navigate('Search')}>
             <Image
               source={require('../assets/icons/create.png')}
               style={style.iconImg}
