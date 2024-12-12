@@ -1,4 +1,6 @@
 import React, {useEffect, useState} from 'react';
+import {collection, addDoc} from 'firebase/firestore';
+import {database} from '../../firebase';
 import {
   View,
   Text,
@@ -41,7 +43,22 @@ function CreateBoard({
     );
   };
 
-  const handleSubmit = () => {
+  const addBoardData = async (board: BoardDataEntry) => {
+    try {
+      //references the board in the boards tables within the database
+      const boardRef = await addDoc(collection(database, 'boards'), {
+        board_id: board.id,
+        name: board.name,
+        description: board.description,
+        photo_urls: [],
+      });
+
+      console.log('Board written to database', boardRef);
+    } catch (error) {
+      console.error('Error adding document: ', error);
+    }
+  };
+  const handleSubmit = async () => {
     if (!boardForm.name.trim() || !boardForm.description.trim()) {
       console.log('Board name and description are required');
       return;
@@ -50,12 +67,17 @@ function CreateBoard({
 
     console.log('Submitting board:', boardWithId);
 
-    navigation.navigate('Profile', {
-      screen: 'MyProfile',
-      params: {newSubmittedBoard: boardWithId},
-    });
-
-    setBoardForm({name: '', description: ''});
+    try {
+      await addBoardData(boardWithId); // Save to database
+      console.log('Board successfully added to database');
+      navigation.navigate('Profile', {
+        screen: 'MyProfile',
+        params: {newSubmittedBoard: boardWithId},
+      });
+      setBoardForm({name: '', description: ''}); // Reset form
+    } catch (error) {
+      console.error('Error while submitting board:', error);
+    }
   };
 
   useEffect(() => {
