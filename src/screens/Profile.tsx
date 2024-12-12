@@ -9,6 +9,7 @@ import {
   Pressable,
   FlatList,
 } from 'react-native';
+import { useBoards } from '../components/BoardsContext';
 
 function Profile({
   navigation,
@@ -24,6 +25,8 @@ function Profile({
     {id: string; name: string; description: string}[]
   >([]);
 
+  const { boards, addNewBoard } = useBoards(); //Zoe add it for recording boards info
+
   useEffect(() => {
     if (route.params?.newSubmittedBoard) {
       console.log('Received submitted board:', route.params.newSubmittedBoard);
@@ -32,6 +35,7 @@ function Profile({
         route.params.newSubmittedBoard,
       ]);
       // navigation.setParams({newBoard: null}); // Clear params to avoid duplicate additions
+      addNewBoard(route.params.newSubmittedBoard); //Zoe add it for recording boards info
     }
   }, [route.params?.newSubmittedBoard]);
 
@@ -79,19 +83,35 @@ function Profile({
         </View>
       ) : (
         <ScrollView style={style.scrollContainer}>
-          {newBoard.map(board => (
-            <Pressable
-              key={board.id}
-              onPress={() => {
-                navigation.navigate('BoardDetails');
-              }}>
-              <View style={style.boardCard}>
-                <Text style={style.boardName}>{board.name}</Text>
-                <Text style={style.boardDescription}>{board.description}</Text>
-              </View>
-            </Pressable>
-          ))}
+          {newBoard.map(board => {
+            const fullBoard = boards.find(b => b.id === board.id);
+            const firstPhotoUri = fullBoard?.photos?.[0]?.src?.small;
+
+            return (
+              <Pressable
+                key={board.id}
+                onPress={() => {
+                  navigation.navigate('BoardDetails', {
+                    boardId: board.id,
+                  });
+                }}>
+                <View style={style.boardCard}>
+                  <Text style={style.boardName}>{board.name}</Text>
+                  <Text style={style.boardDescription}>{board.description}</Text>
+                  {firstPhotoUri ? (
+                    <Image
+                      source={{ uri: firstPhotoUri }}
+                      style={style.profileImage}
+                    />
+                  ) : (
+                    <Text>No Image Now</Text>
+                  )}
+                </View>
+              </Pressable>
+            );
+          })}
         </ScrollView>
+
       )}
     </View>
   );

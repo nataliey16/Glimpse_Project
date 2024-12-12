@@ -1,12 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {Modal, View, Text, TouchableOpacity, StyleSheet} from 'react-native';
-import {Screen} from 'react-native-screens';
+import { useBoards } from './BoardsContext';
+import SelectBoardModal from './SelectBoardModal';
+
+type Photo = {
+  id: number;
+  width: number;
+  height: number;
+  src: {
+    small: string;
+    original: string;
+  };
+};
 
 interface MoodBoardModalProps {
   visible: boolean;
   onClose: () => void;
   onSelectExistingBoard: () => void;
   onCreateNewBoard: () => void;
+  photo: Photo;
   navigation: any;
 }
 
@@ -15,8 +27,18 @@ const StoredInModal: React.FC<MoodBoardModalProps> = ({
   onClose,
   onSelectExistingBoard,
   onCreateNewBoard,
+  photo,
   navigation,
 }) => {
+
+  const {boards} = useBoards();
+  const [selectBoardModalVisible, setSelectBoardModalVisible] = useState(false);
+  const handleCloseSelectBoardModal = () => {
+    setSelectBoardModalVisible(false);
+    onClose();
+    onSelectExistingBoard();
+  };
+
   return (
     <Modal
       visible={visible}
@@ -27,28 +49,26 @@ const StoredInModal: React.FC<MoodBoardModalProps> = ({
         <View style={styles.modalContent}>
           <Text style={styles.modalTitle}>Stored In:</Text>
 
-          <TouchableOpacity
-            style={styles.modalButton}
-            onPress={onSelectExistingBoard}>
-            <Text
-              style={styles.modalButtonText}
-              onPress={() =>
-                navigation.navigate('Profile', {screen: 'MyProfile'})
-              }>
-              Existing Board
-            </Text>
-          </TouchableOpacity>
+          {boards.length > 0 ? (
+            <>
+              <TouchableOpacity
+                style={styles.modalButton}
+                onPress={() => setSelectBoardModalVisible(true)}>
+                <Text
+                  style={styles.modalButtonText}
+                >
+                  Existing Board
+                </Text>
+              </TouchableOpacity>
+            </>
+          ) : null}
 
           <TouchableOpacity
             style={styles.modalButton}
             onPress={onCreateNewBoard}>
             <Text
               style={styles.modalButtonText}
-              onPress={() =>
-                navigation.navigate('Create Board', {
-                  screen: 'CreateBoard',
-                })
-              }>
+              >
               Create a Board
             </Text>
           </TouchableOpacity>
@@ -58,7 +78,15 @@ const StoredInModal: React.FC<MoodBoardModalProps> = ({
           </TouchableOpacity>
         </View>
       </View>
+      <SelectBoardModal
+        visible={selectBoardModalVisible}
+        onClose={handleCloseSelectBoardModal}
+        boards={boards}
+        navigation={navigation}
+        photo={photo}
+      />
     </Modal>
+    
   );
 };
 
@@ -67,7 +95,7 @@ export default StoredInModal;
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // 背景半透明
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
   },

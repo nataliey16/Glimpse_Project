@@ -132,8 +132,8 @@ const SearchScreen = ({navigation}: {navigation: any}) => {
 
   const addToMoodBoard = () => {
     // Alert.alert('Mood Board', 'Photo added to your Mood Board!');
-    setShowBoardOptions(true);
     // closePhotoModal();
+    setShowBoardOptions(true);
   };
 
   const handleSelectExistingBoard = () => {
@@ -146,6 +146,9 @@ const SearchScreen = ({navigation}: {navigation: any}) => {
     console.log('Create New Board');
     setShowBoardOptions(false);
     closePhotoModal();
+    navigation.navigate('Create Board', {
+      screen: 'CreateBoard',
+    });
   };
 
   const handleCloseStoredInModal = () => {
@@ -202,15 +205,16 @@ const SearchScreen = ({navigation}: {navigation: any}) => {
       )}
 
       {/* Stored In Modal */}
-      {showBoardOptions && (
-        <StoredInModal
-          visible={showBoardOptions}
-          onClose={handleCloseStoredInModal}
-          onSelectExistingBoard={handleSelectExistingBoard}
-          onCreateNewBoard={handleCreateNewBoard}
-          navigation={navigation}
-        />
-      )}
+      {showBoardOptions && selectedPhoto && (
+      <StoredInModal
+        visible={showBoardOptions}
+        onClose={handleCloseStoredInModal}
+        onSelectExistingBoard={handleSelectExistingBoard}
+        onCreateNewBoard={handleCreateNewBoard}
+        navigation={navigation}
+        photo={selectedPhoto}
+      />
+    )}
     </View>
   );
 };

@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   ScrollView,
   Image,
@@ -6,9 +6,25 @@ import {
   Text,
   View,
   TouchableOpacity,
-  Pressable,
-  FlatList,
+  Dimensions,
 } from 'react-native';
+import { useBoards } from '../components/BoardsContext';
+import PhotoCard from '../components/PhotoCard';
+
+type Photo = {
+  id: number;
+  width: number;
+  height: number;
+  src: {
+    small: string;
+    original: string;
+  };
+};
+
+const screenWidth = Dimensions.get('window').width;
+const spacing = 10;
+const numColumns = 2;
+const columnWidth = (screenWidth - spacing * (numColumns + 1)) / numColumns;
 
 function BoardDetails({
   navigation,
@@ -17,20 +33,35 @@ function BoardDetails({
   navigation: any;
   route: any;
 }): React.JSX.Element {
-  const [newBoard, setNewBoard] = useState<
-    {id: string; name: string; description: string}[]
-  >([]);
+
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [columns, setColumns] = useState<[Photo[], Photo[]]>([[], []]);
+  const { boards } = useBoards();
+  const boardId = route.params?.boardId;
+  console.log(`Board ID: ${route.params?.boardId}`);
+  const board = boards.find((b) => b.id === boardId);
 
   useEffect(() => {
-    if (route.params?.newSubmittedBoard) {
-      console.log('Received submitted board:', route.params.newSubmittedBoard);
-      setNewBoard(prevBoards => [
-        ...prevBoards,
-        route.params.newSubmittedBoard,
-      ]);
-      // navigation.setParams({newBoard: null}); // Clear params to avoid duplicate additions
+    if (board?.photos) {
+      distributePhotos(board.photos);
     }
-  }, [route.params?.newSubmittedBoard]);
+  }, [board]);
+
+  const distributePhotos = (photos: Photo[]) => {
+    const columnHeights = [0, 0];
+    const newColumns: [Photo[], Photo[]] = [[], []];
+
+    photos.forEach(photo => {
+      const photoHeight = (photo.height / photo.width) * columnWidth;
+      const columnIndex = columnHeights[0] <= columnHeights[1] ? 0 : 1;
+      columnHeights[columnIndex] += photoHeight + spacing;
+      newColumns[columnIndex].push(photo);
+    });
+
+    setColumns(newColumns);
+  };
+
+  const firstPhoto = board?.photos?.[0];
 
   return (
     <View style={style.BoardDetailsBg}>
@@ -43,28 +74,40 @@ function BoardDetails({
       </TouchableOpacity>
 
       {/* BoardDetails Section */}
-      <View style={style.userPf}>
-        <Image
-          source={{uri: 'https://via.placeholder.com/100'}}
-          style={style.BoardDetailsImage}
-        />
-        <View style={style.textContainer}>
-          <Text style={style.userIntro}>Hello </Text>
+      {board ? (
+        <View style={style.userPf}>
+          {firstPhoto && (
+            <Image
+              source={{ uri: firstPhoto.src?.small }}
+              style={style.BoardDetailsImage}
+            />
+          )}
+          <View style={style.textContainer}>
+            <Text style={style.userIntro}>{board.description}</Text>
+          </View>
         </View>
-      </View>
+      ) : (
+        <Text>Board</Text>
+      )}
 
       {/* Content Section */}
 
       {/* Render Images */}
-
-      <ScrollView style={style.scrollContainer}>
-        {newBoard.map(board => (
-          <Pressable key={board.id}>
-            <View style={style.boardCard}>
-              <Text style={style.boardName}>{board.name}</Text>
-              <Text style={style.boardDescription}>{board.description}</Text>
-            </View>
-          </Pressable>
+      <ScrollView ref={scrollViewRef} contentContainerStyle={style.photoGrid}>
+        {columns.map((columnPhotos, columnIndex) => (
+          <View key={columnIndex} style={style.column}>
+            {columnPhotos.map(photo => (
+              <TouchableOpacity
+                key={photo.id}
+                >
+                <PhotoCard
+                  key={photo.id}
+                  photo={photo}
+                  columnWidth={columnWidth}
+                />
+              </TouchableOpacity>
+            ))}
+          </View>
         ))}
       </ScrollView>
     </View>
@@ -166,6 +209,16 @@ const style = StyleSheet.create({
   boardDescription: {
     fontSize: 14,
     color: '#555',
+  },
+  photoGrid: {
+    marginTop: 20,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingHorizontal: spacing,
+  },
+  column: {
+    width: columnWidth,
   },
 });
 

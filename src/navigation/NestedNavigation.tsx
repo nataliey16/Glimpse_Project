@@ -7,11 +7,13 @@ import ProfileStackNav from './ProfileStackNav';
 import SearchStackNav from './SearchStackNav';
 import CreateBoardStackNav from './CreateBoardStackNav';
 import TabIcon from '../components/TabIcon';
+import { BoardsProvider } from '../components/BoardsContext';
 
 const NestedNav = createBottomTabNavigator();
 
 function NestedNavigation(): React.JSX.Element {
   return (
+    <BoardsProvider>
     <View style={styles.tabView}>
       <NavigationContainer>
         <NestedNav.Navigator
@@ -49,6 +51,7 @@ function NestedNavigation(): React.JSX.Element {
         </NestedNav.Navigator>
       </NavigationContainer>
     </View>
+    </BoardsProvider>
   );
 }
 const styles = StyleSheet.create({
