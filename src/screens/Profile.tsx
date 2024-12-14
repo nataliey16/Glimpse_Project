@@ -9,9 +9,9 @@ import {
   Pressable,
   FlatList,
 } from 'react-native';
-import { database } from '../../firebase';
-import { collection, getDocs } from 'firebase/firestore';
-import { useFocusEffect } from '@react-navigation/native';
+import {database} from '../utils/firebase';
+import {collection, getDocs} from 'firebase/firestore';
+import {useFocusEffect} from '@react-navigation/native';
 
 type Photo = {
   id: number;
@@ -61,15 +61,16 @@ function Profile({
             id: doc.data().board_id,
             name: doc.data().name,
             description: doc.data().description,
-            photos: doc.data().photos
+            photos: doc.data().photos,
           }));
-          console.log('Fetched Boards:', boardsData); 
+          console.log('Fetched Boards:', boardsData);
           setBoards(boardsData);
         } catch (error) {
           console.error('Error fetching boards:', error);
-        }};
+        }
+      };
       fetchBoardsFromDB();
-      // setTimeout(fetchBoardsFromDB, 3000); 
+      // setTimeout(fetchBoardsFromDB, 3000);
     }
   }, [route.params?.newSubmittedBoard]);
 
@@ -82,16 +83,17 @@ function Profile({
             id: doc.data().board_id,
             name: doc.data().name,
             description: doc.data().description,
-            photos: doc.data().photos
+            photos: doc.data().photos,
           }));
-          console.log('useFocusEffect Fetched Boards:', boardsData); 
+          console.log('useFocusEffect Fetched Boards:', boardsData);
           setBoards(boardsData);
         } catch (error) {
           console.error('Error fetching boards:', error);
-        }};
+        }
+      };
       // fetchBoardsFromDB();
-      setTimeout(fetchBoardsFromDB, 3000); 
-    }, [])
+      setTimeout(fetchBoardsFromDB, 3000);
+    }, []),
   );
 
   return (
@@ -141,8 +143,8 @@ function Profile({
           {newBoard.map(board => {
             const fullBoard = boards.find(b => b.id === board.id);
             const firstPhotoUri = fullBoard?.photos?.[0]?.src?.small;
-            console.log(`fullBoard`,fullBoard);
-            console.log(`firstPhotoUri`,firstPhotoUri);
+            console.log(`fullBoard`, fullBoard);
+            console.log(`firstPhotoUri`, firstPhotoUri);
 
             return (
               <Pressable
@@ -154,10 +156,12 @@ function Profile({
                 }}>
                 <View style={style.boardCard}>
                   <Text style={style.boardName}>{board.name}</Text>
-                  <Text style={style.boardDescription}>{board.description}</Text>
+                  <Text style={style.boardDescription}>
+                    {board.description}
+                  </Text>
                   {firstPhotoUri ? (
                     <Image
-                      source={{ uri: firstPhotoUri }}
+                      source={{uri: firstPhotoUri}}
                       style={style.profileImage}
                     />
                   ) : (
@@ -168,7 +172,6 @@ function Profile({
             );
           })}
         </ScrollView>
-
       )}
     </View>
   );

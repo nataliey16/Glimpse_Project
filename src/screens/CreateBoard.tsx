@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {collection, addDoc} from 'firebase/firestore';
-import {database} from '../../firebase';
+import {database} from '../utils/firebase';
 import {
   View,
   Text,
