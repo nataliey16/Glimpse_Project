@@ -8,8 +8,9 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
-import { useBoards } from '../components/BoardsContext';
 import PhotoCard from '../components/PhotoCard';
+import { database } from '../../firebase';
+import { collection, getDocs } from 'firebase/firestore';
 
 type Photo = {
   id: number;
@@ -19,6 +20,13 @@ type Photo = {
     small: string;
     original: string;
   };
+};
+
+type Board = {
+  id: string;
+  name: string;
+  description: string;
+  photos: Photo[] | null;
 };
 
 const screenWidth = Dimensions.get('window').width;
@@ -36,10 +44,30 @@ function BoardDetails({
 
   const scrollViewRef = useRef<ScrollView>(null);
   const [columns, setColumns] = useState<[Photo[], Photo[]]>([[], []]);
-  const { boards } = useBoards();
+  const [boards, setBoards] = useState<Board[]>([]);
   const boardId = route.params?.boardId;
   console.log(`Board ID: ${route.params?.boardId}`);
   const board = boards.find((b) => b.id === boardId);
+
+  useEffect(() => {
+    const fetchBoardsFromDB = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(database, 'boards'));
+        const boardsData: Board[] = querySnapshot.docs.map(doc => ({
+          id: doc.data().board_id,
+          name: doc.data().name,
+          description: doc.data().description,
+          photos: doc.data().photos
+        }));
+        console.log('Details Page Fetched Boards:', boardsData); 
+        setBoards(boardsData);
+      } catch (error) {
+        console.error('Error fetching boards:', error);
+      }
+    };
+  
+    fetchBoardsFromDB();
+  }, []);
 
   useEffect(() => {
     if (board?.photos) {

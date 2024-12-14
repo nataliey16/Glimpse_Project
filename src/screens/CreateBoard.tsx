@@ -16,6 +16,23 @@ interface BoardDataEntry {
   description: string;
 }
 
+type Board = {
+  id: string;
+  name: string;
+  description: string;
+  photos: Photo[] | null;
+};
+
+type Photo = {
+  id: number;
+  width: number;
+  height: number;
+  src: {
+    small: string;
+    original: string;
+  };
+};
+
 function CreateBoard({
   route,
   navigation,
@@ -43,14 +60,14 @@ function CreateBoard({
     );
   };
 
-  const addBoardData = async (board: BoardDataEntry) => {
+  const addBoardData = async (board: Board) => {
     try {
       //references the board in the boards tables within the database
       const boardRef = await addDoc(collection(database, 'boards'), {
         board_id: board.id,
         name: board.name,
         description: board.description,
-        photo_urls: [],
+        photos: board.photos,
       });
 
       console.log('Board written to database', boardRef);
@@ -63,9 +80,15 @@ function CreateBoard({
       console.log('Board name and description are required');
       return;
     }
-    const boardWithId: BoardDataEntry = {...boardForm, id: getNewID()};
+    // const boardWithId: Board = {...boardForm, id: getNewID()};
 
-    console.log('Submitting board:', boardWithId);
+    // console.log('Submitting board:', boardWithId);
+    const boardWithId: Board = {
+      id: getNewID(),
+      name: boardForm.name,
+      description: boardForm.description,
+      photos: [], // Initialize with an empty photos array
+    };
 
     try {
       await addBoardData(boardWithId); // Save to database

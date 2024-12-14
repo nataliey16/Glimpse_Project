@@ -9,7 +9,26 @@ import {
   Pressable,
   FlatList,
 } from 'react-native';
-import { useBoards } from '../components/BoardsContext';
+import { database } from '../../firebase';
+import { collection, getDocs } from 'firebase/firestore';
+import { useFocusEffect } from '@react-navigation/native';
+
+type Photo = {
+  id: number;
+  width: number;
+  height: number;
+  src: {
+    small: string;
+    original: string;
+  };
+};
+
+type Board = {
+  id: string;
+  name: string;
+  description: string;
+  photos: Photo[] | null;
+};
 
 function Profile({
   navigation,
@@ -25,7 +44,7 @@ function Profile({
     {id: string; name: string; description: string}[]
   >([]);
 
-  const { boards, addNewBoard } = useBoards(); //Zoe add it for recording boards info
+  const [boards, setBoards] = useState<Board[]>([]);
 
   useEffect(() => {
     if (route.params?.newSubmittedBoard) {
@@ -35,9 +54,45 @@ function Profile({
         route.params.newSubmittedBoard,
       ]);
       // navigation.setParams({newBoard: null}); // Clear params to avoid duplicate additions
-      addNewBoard(route.params.newSubmittedBoard); //Zoe add it for recording boards info
+      const fetchBoardsFromDB = async () => {
+        try {
+          const querySnapshot = await getDocs(collection(database, 'boards'));
+          const boardsData: Board[] = querySnapshot.docs.map(doc => ({
+            id: doc.data().board_id,
+            name: doc.data().name,
+            description: doc.data().description,
+            photos: doc.data().photos
+          }));
+          console.log('Fetched Boards:', boardsData); 
+          setBoards(boardsData);
+        } catch (error) {
+          console.error('Error fetching boards:', error);
+        }};
+      fetchBoardsFromDB();
+      // setTimeout(fetchBoardsFromDB, 3000); 
     }
   }, [route.params?.newSubmittedBoard]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchBoardsFromDB = async () => {
+        try {
+          const querySnapshot = await getDocs(collection(database, 'boards'));
+          const boardsData: Board[] = querySnapshot.docs.map(doc => ({
+            id: doc.data().board_id,
+            name: doc.data().name,
+            description: doc.data().description,
+            photos: doc.data().photos
+          }));
+          console.log('useFocusEffect Fetched Boards:', boardsData); 
+          setBoards(boardsData);
+        } catch (error) {
+          console.error('Error fetching boards:', error);
+        }};
+      // fetchBoardsFromDB();
+      setTimeout(fetchBoardsFromDB, 3000); 
+    }, [])
+  );
 
   return (
     <View style={style.profileBg}>
@@ -86,6 +141,8 @@ function Profile({
           {newBoard.map(board => {
             const fullBoard = boards.find(b => b.id === board.id);
             const firstPhotoUri = fullBoard?.photos?.[0]?.src?.small;
+            console.log(`fullBoard`,fullBoard);
+            console.log(`firstPhotoUri`,firstPhotoUri);
 
             return (
               <Pressable

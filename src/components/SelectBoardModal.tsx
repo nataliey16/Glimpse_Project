@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
-import { useBoards } from './BoardsContext';
+import { database } from '../../firebase';
+import { arrayUnion, doc, updateDoc } from 'firebase/firestore';
 
 type Photo = {
     id: number;
@@ -10,7 +11,7 @@ type Photo = {
         small: string;
         original: string;
     };
-};  
+};
 
 interface SelectBoardModalProps {
     visible: boolean;
@@ -27,15 +28,25 @@ const SelectBoardModal: React.FC<SelectBoardModalProps> = ({
     photo,
     navigation,
 }) => {
-
-    const { addBoard } = useBoards();
-
-    const handleSelectBoard = (boardId: string) => {
+    const handleSelectBoard = async (boardId: string) => {
         console.log(`Selected board: ${boardId}`);
         console.log('Selected photo id in the Selected board:', photo.id);
-        addBoard(boardId, photo);
-        onClose();
-        navigation.navigate('Search'); 
+
+        try {
+            const boardDocRef = doc(database, 'boards', boardId);
+            await updateDoc(boardDocRef, {
+                photos: arrayUnion({
+                    id: photo.id,
+                    width: photo.width,
+                    height: photo.height,
+                    src: photo.src,
+                }),
+            });
+            onClose();
+            navigation.navigate('Search');
+        } catch (error) {
+            console.error('Error adding document: ', error);
+        }
     };
 
     const renderBoardItem = ({ item }: { item: { id: string; name: string } }) => (
