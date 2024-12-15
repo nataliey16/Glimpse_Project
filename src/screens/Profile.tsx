@@ -12,7 +12,7 @@ import {
 import {database} from '../utils/firebase';
 import {collection, getDocs} from 'firebase/firestore';
 import {useFocusEffect} from '@react-navigation/native';
-import UpdateModal from '../components/UpdateModal';
+import DeleteModal from '../components/DeleteModal';
 
 type Photo = {
   id: number;
@@ -123,6 +123,7 @@ function Profile({
           <Text style={style.userName}>Gabrielle!</Text>
         </View>
       </View>
+      <DeleteModal />
 
       {/* Content Section */}
       <View style={style.profileText}>
@@ -188,6 +189,16 @@ function Profile({
                       </TouchableOpacity>
                     </View>
                   )}
+                </View>
+                <View style={style.createBoardSection}>
+                  <Text style={style.createBoardText}>Create a Board</Text>
+                  <TouchableOpacity
+                    onPress={() => navigation.navigate('Create Board')}>
+                    <Image
+                      source={require('../assets/icons/create.png')}
+                      style={style.iconImg}
+                    />
+                  </TouchableOpacity>
                 </View>
               </Pressable>
             );
