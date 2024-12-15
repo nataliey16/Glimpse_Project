@@ -12,6 +12,7 @@ import {
 import {database} from '../utils/firebase';
 import {collection, getDocs} from 'firebase/firestore';
 import {useFocusEffect} from '@react-navigation/native';
+import UpdateModal from '../components/UpdateModal';
 
 type Photo = {
   id: number;
@@ -45,6 +46,7 @@ function Profile({
   >([]);
 
   const [boards, setBoards] = useState<Board[]>([]);
+  const [editBoard, setEditBoard] = useState(false);
 
   useEffect(() => {
     if (route.params?.newSubmittedBoard) {
@@ -71,6 +73,9 @@ function Profile({
       };
       fetchBoardsFromDB();
       // setTimeout(fetchBoardsFromDB, 3000);
+
+      // Clear params to avoid re-triggering the effect
+      navigation.setParams({newSubmittedBoard: null});
     }
   }, [route.params?.newSubmittedBoard]);
 
@@ -96,13 +101,14 @@ function Profile({
     }, []),
   );
 
+  const handleEdit = () => {
+    setEditBoard(true);
+  };
+
   return (
     <View style={style.profileBg}>
       {/* Edit Button */}
-      <TouchableOpacity
-        onPress={() => {
-          console.log('Edit Profile');
-        }}>
+      <TouchableOpacity onPress={handleEdit}>
         <Text style={style.editText}>Edit</Text>
       </TouchableOpacity>
 
@@ -159,6 +165,7 @@ function Profile({
                   <Text style={style.boardDescription}>
                     {board.description}
                   </Text>
+
                   {firstPhotoUri ? (
                     <Image
                       source={{uri: firstPhotoUri}}
@@ -166,6 +173,20 @@ function Profile({
                     />
                   ) : (
                     <Text>No Image Now</Text>
+                  )}
+
+                  {editBoard && (
+                    <View style={style.editButtonView}>
+                      <TouchableOpacity
+                        style={[style.editButton, style.deleteButton]}>
+                        <Text style={style.editButtonText}>Delete</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[style.editButton, style.cancelButton]}
+                        onPress={() => setEditBoard(false)}>
+                        <Text style={style.editButtonText}>Cancel</Text>
+                      </TouchableOpacity>
+                    </View>
                   )}
                 </View>
               </Pressable>
@@ -241,6 +262,29 @@ const style = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'right',
     paddingRight: 20,
+  },
+  editButtonView: {
+    padding: 10,
+  },
+  editButton: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 5,
+  },
+  deleteButton: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+  },
+  cancelButton: {
+    position: 'absolute',
+    bottom: 10,
+    left: 10,
+  },
+  editButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#F79D7D',
   },
   createBoardSection: {
     marginTop: 40,
