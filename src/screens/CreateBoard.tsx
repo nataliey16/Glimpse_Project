@@ -145,7 +145,7 @@ function CreateBoard({
           style={style.submitBtn}
           onPress={() => {
             setBoardForm({name: '', description: ''});
-            //navigation.goBack();
+            navigation.goBack();
           }}>
           <Text style={style.submitBtnTxt}>Cancel</Text>
         </TouchableOpacity>

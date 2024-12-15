@@ -128,7 +128,7 @@ function Profile({
       </View>
 
       {/* Render Boards */}
-      {newBoard.length === 0 ? (
+      {boards.length === 0 ? (
         <View style={style.createBoardSection}>
           <Text style={style.createBoardText}>Create a Board</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Create Board')}>
@@ -140,7 +140,7 @@ function Profile({
         </View>
       ) : (
         <ScrollView style={style.scrollContainer}>
-          {newBoard.map(board => {
+          {boards.map(board => {
             const fullBoard = boards.find(b => b.id === board.id);
             const firstPhotoUri = fullBoard?.photos?.[0]?.src?.small;
             console.log(`fullBoard`, fullBoard);
