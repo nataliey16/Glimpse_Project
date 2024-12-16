@@ -206,15 +206,15 @@ const SearchScreen = ({navigation}: {navigation: any}) => {
 
       {/* Stored In Modal */}
       {showBoardOptions && selectedPhoto && (
-      <StoredInModal
-        visible={showBoardOptions}
-        onClose={handleCloseStoredInModal}
-        onSelectExistingBoard={handleSelectExistingBoard}
-        onCreateNewBoard={handleCreateNewBoard}
-        navigation={navigation}
-        photo={selectedPhoto}
-      />
-    )}
+        <StoredInModal
+          visible={showBoardOptions}
+          onClose={handleCloseStoredInModal}
+          onSelectExistingBoard={handleSelectExistingBoard}
+          onCreateNewBoard={handleCreateNewBoard}
+          navigation={navigation}
+          photo={selectedPhoto}
+        />
+      )}
     </View>
   );
 };

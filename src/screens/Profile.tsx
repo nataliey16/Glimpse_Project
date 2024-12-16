@@ -9,7 +9,33 @@ import {
   Pressable,
   FlatList,
 } from 'react-native';
-import { useBoards } from '../components/BoardsContext';
+import {database} from '../utils/firebase';
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  deleteField,
+} from 'firebase/firestore';
+import {useFocusEffect} from '@react-navigation/native';
+import DeleteModal from '../components/DeleteModal';
+
+type Photo = {
+  id: number;
+  width: number;
+  height: number;
+  src: {
+    small: string;
+    original: string;
+  };
+};
+
+type Board = {
+  id: string;
+  name: string;
+  description: string;
+  photos: Photo[] | null;
+};
 
 function Profile({
   navigation,
@@ -25,7 +51,38 @@ function Profile({
     {id: string; name: string; description: string}[]
   >([]);
 
-  const { boards, addNewBoard } = useBoards(); //Zoe add it for recording boards info
+  const [boards, setBoards] = useState<Board[]>([]);
+  const [editBoard, setEditBoard] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
+
+  const handleEdit = () => {
+    setEditBoard(true);
+  };
+
+  const openDeleteModal = (boardId: string) => {
+    console.log('Open delete modal for modal id:', boardId);
+    setIsModalVisible(true);
+    setSelectedBoardId(boardId);
+  };
+
+  const handleCancelModal = () => {
+    setIsModalVisible(false);
+  };
+
+  const handleDeleteModal = async (boardId: string) => {
+    try {
+      const boardDocRef = doc(database, 'boards', boardId);
+      await deleteDoc(boardDocRef);
+
+      console.log(`Delete board with id:${boardId}`);
+
+      setBoards(prevBoards => prevBoards.filter(board => board.id !== boardId));
+      setIsModalVisible(false);
+    } catch (error) {
+      console.error('Error deleting board:', error);
+    }
+  };
 
   useEffect(() => {
     if (route.params?.newSubmittedBoard) {
@@ -34,18 +91,56 @@ function Profile({
         ...prevBoards,
         route.params.newSubmittedBoard,
       ]);
-      // navigation.setParams({newBoard: null}); // Clear params to avoid duplicate additions
-      addNewBoard(route.params.newSubmittedBoard); //Zoe add it for recording boards info
+      const fetchBoardsFromDB = async () => {
+        try {
+          const querySnapshot = await getDocs(collection(database, 'boards'));
+          const boardsData: Board[] = querySnapshot.docs.map(doc => ({
+            // id: doc.data().board_id,
+            id: doc.id,
+            name: doc.data().name,
+            description: doc.data().description,
+            photos: doc.data().photos,
+          }));
+          console.log('Fetched Boards:', boardsData);
+          setBoards(boardsData);
+        } catch (error) {
+          console.error('Error fetching boards:', error);
+        }
+      };
+      fetchBoardsFromDB();
+
+      // Clear params to avoid re-triggering the effect
+      navigation.setParams({newSubmittedBoard: null});
     }
   }, [route.params?.newSubmittedBoard]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchBoardsFromDB = async () => {
+        try {
+          const querySnapshot = await getDocs(collection(database, 'boards'));
+          const boardsData: Board[] = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            // id: doc.data().board_id,
+            name: doc.data().name,
+            description: doc.data().description,
+            photos: doc.data().photos,
+          }));
+          console.log('useFocusEffect Fetched Boards:', boardsData);
+          setBoards(boardsData);
+        } catch (error) {
+          console.error('Error fetching boards:', error);
+        }
+      };
+      // fetchBoardsFromDB();
+      setTimeout(fetchBoardsFromDB, 3000);
+    }, []),
+  );
 
   return (
     <View style={style.profileBg}>
       {/* Edit Button */}
-      <TouchableOpacity
-        onPress={() => {
-          console.log('Edit Profile');
-        }}>
+      <TouchableOpacity onPress={handleEdit}>
         <Text style={style.editText}>Edit</Text>
       </TouchableOpacity>
 
@@ -71,7 +166,7 @@ function Profile({
       </View>
 
       {/* Render Boards */}
-      {newBoard.length === 0 ? (
+      {boards.length === 0 ? (
         <View style={style.createBoardSection}>
           <Text style={style.createBoardText}>Create a Board</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Create Board')}>
@@ -83,9 +178,11 @@ function Profile({
         </View>
       ) : (
         <ScrollView style={style.scrollContainer}>
-          {newBoard.map(board => {
+          {boards.map(board => {
             const fullBoard = boards.find(b => b.id === board.id);
             const firstPhotoUri = fullBoard?.photos?.[0]?.src?.small;
+            console.log(`fullBoard`, fullBoard);
+            console.log(`firstPhotoUri`, firstPhotoUri);
 
             return (
               <Pressable
@@ -97,21 +194,56 @@ function Profile({
                 }}>
                 <View style={style.boardCard}>
                   <Text style={style.boardName}>{board.name}</Text>
-                  <Text style={style.boardDescription}>{board.description}</Text>
+                  <Text style={style.boardDescription}>
+                    {board.description}
+                  </Text>
+
                   {firstPhotoUri ? (
                     <Image
-                      source={{ uri: firstPhotoUri }}
+                      source={{uri: firstPhotoUri}}
                       style={style.profileImage}
                     />
                   ) : (
                     <Text>No Image Now</Text>
                   )}
+
+                  {editBoard && (
+                    <View style={style.editButtonView}>
+                      <TouchableOpacity
+                        style={[style.editButton, style.deleteButton]}
+                        onPress={() => openDeleteModal(board.id)}>
+                        <Text style={style.editButtonText}>Delete</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        style={[style.editButton, style.cancelButton]}
+                        onPress={() => setEditBoard(false)}>
+                        <Text style={style.editButtonText}>Cancel</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+
+                  {isModalVisible && selectedBoardId && (
+                    <DeleteModal
+                      handleCancelModal={handleCancelModal}
+                      handleDeleteModal={handleDeleteModal}
+                      boardId={board.id}
+                    />
+                  )}
                 </View>
               </Pressable>
             );
           })}
+          <View style={style.createBoardSection}>
+            <Text style={style.createBoardText}>Create a Board</Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Create Board')}>
+              <Image
+                source={require('../assets/icons/create.png')}
+                style={style.iconImg}
+              />
+            </TouchableOpacity>
+          </View>
         </ScrollView>
-
       )}
     </View>
   );
@@ -181,6 +313,29 @@ const style = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'right',
     paddingRight: 20,
+  },
+  editButtonView: {
+    padding: 10,
+  },
+  editButton: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 10,
+    padding: 5,
+  },
+  deleteButton: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+  },
+  cancelButton: {
+    position: 'absolute',
+    bottom: 10,
+    left: 10,
+  },
+  editButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#F79D7D',
   },
   createBoardSection: {
     marginTop: 40,

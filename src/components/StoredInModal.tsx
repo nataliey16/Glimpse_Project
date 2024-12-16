@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {Modal, View, Text, TouchableOpacity, StyleSheet} from 'react-native';
-import { useBoards } from './BoardsContext';
 import SelectBoardModal from './SelectBoardModal';
+import {database} from '../utils/firebase';
+import {collection, getDocs} from 'firebase/firestore';
 
 type Photo = {
   id: number;
@@ -11,6 +12,13 @@ type Photo = {
     small: string;
     original: string;
   };
+};
+
+type Board = {
+  id: string;
+  name: string;
+  description: string;
+  // photos: Photo[] | null;
 };
 
 interface MoodBoardModalProps {
@@ -30,14 +38,36 @@ const StoredInModal: React.FC<MoodBoardModalProps> = ({
   photo,
   navigation,
 }) => {
-
-  const {boards} = useBoards();
   const [selectBoardModalVisible, setSelectBoardModalVisible] = useState(false);
+  const [boards, setBoards] = useState<
+    {id: string; name: string; description: string}[]
+  >([]);
+
   const handleCloseSelectBoardModal = () => {
     setSelectBoardModalVisible(false);
     onClose();
     onSelectExistingBoard();
   };
+
+  useEffect(() => {
+    const fetchBoardsFromDB = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(database, 'boards'));
+        const boardsData: Board[] = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          name: doc.data().name,
+          description: doc.data().description,
+        }));
+        setBoards(boardsData);
+      } catch (error) {
+        console.error('Error fetching boards:', error);
+      }
+    };
+
+    if (visible) {
+      fetchBoardsFromDB();
+    }
+  }, [visible]);
 
   return (
     <Modal
@@ -54,11 +84,7 @@ const StoredInModal: React.FC<MoodBoardModalProps> = ({
               <TouchableOpacity
                 style={styles.modalButton}
                 onPress={() => setSelectBoardModalVisible(true)}>
-                <Text
-                  style={styles.modalButtonText}
-                >
-                  Existing Board
-                </Text>
+                <Text style={styles.modalButtonText}>Existing Board</Text>
               </TouchableOpacity>
             </>
           ) : null}
@@ -66,11 +92,7 @@ const StoredInModal: React.FC<MoodBoardModalProps> = ({
           <TouchableOpacity
             style={styles.modalButton}
             onPress={onCreateNewBoard}>
-            <Text
-              style={styles.modalButtonText}
-              >
-              Create a Board
-            </Text>
+            <Text style={styles.modalButtonText}>Create a Board</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
@@ -86,7 +108,6 @@ const StoredInModal: React.FC<MoodBoardModalProps> = ({
         photo={photo}
       />
     </Modal>
-    
   );
 };
 

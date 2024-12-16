@@ -8,8 +8,9 @@ import {
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
-import { useBoards } from '../components/BoardsContext';
 import PhotoCard from '../components/PhotoCard';
+import {database} from '../utils/firebase';
+import {collection, getDocs} from 'firebase/firestore';
 
 type Photo = {
   id: number;
@@ -19,6 +20,13 @@ type Photo = {
     small: string;
     original: string;
   };
+};
+
+type Board = {
+  id: string;
+  name: string;
+  description: string;
+  photos: Photo[] | null;
 };
 
 const screenWidth = Dimensions.get('window').width;
@@ -33,13 +41,33 @@ function BoardDetails({
   navigation: any;
   route: any;
 }): React.JSX.Element {
-
   const scrollViewRef = useRef<ScrollView>(null);
   const [columns, setColumns] = useState<[Photo[], Photo[]]>([[], []]);
-  const { boards } = useBoards();
+  const [boards, setBoards] = useState<Board[]>([]);
+
   const boardId = route.params?.boardId;
   console.log(`Board ID: ${route.params?.boardId}`);
-  const board = boards.find((b) => b.id === boardId);
+  const board = boards.find(b => b.id === boardId);
+
+  useEffect(() => {
+    const fetchBoardsFromDB = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(database, 'boards'));
+        const boardsData: Board[] = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          name: doc.data().name,
+          description: doc.data().description,
+          photos: doc.data().photos,
+        }));
+        console.log('Details Page Fetched Boards:', boardsData);
+        setBoards(boardsData);
+      } catch (error) {
+        console.error('Error fetching boards:', error);
+      }
+    };
+
+    fetchBoardsFromDB();
+  }, []);
 
   useEffect(() => {
     if (board?.photos) {
@@ -65,6 +93,11 @@ function BoardDetails({
 
   return (
     <View style={style.BoardDetailsBg}>
+      <TouchableOpacity
+        style={style.closeButton}
+        onPress={() => navigation.goBack()}>
+        <Text style={style.buttonText}>Back to Profile</Text>
+      </TouchableOpacity>
       {/* Edit Button */}
       <TouchableOpacity
         onPress={() => {
@@ -78,12 +111,13 @@ function BoardDetails({
         <View style={style.userPf}>
           {firstPhoto && (
             <Image
-              source={{ uri: firstPhoto.src?.small }}
+              source={{uri: firstPhoto.src?.small}}
               style={style.BoardDetailsImage}
             />
           )}
           <View style={style.textContainer}>
-            <Text style={style.userIntro}>{board.description}</Text>
+            <Text style={style.boardName}>{board.name}</Text>
+            <Text style={style.boardDesc}>{board.description}</Text>
           </View>
         </View>
       ) : (
@@ -97,9 +131,7 @@ function BoardDetails({
         {columns.map((columnPhotos, columnIndex) => (
           <View key={columnIndex} style={style.column}>
             {columnPhotos.map(photo => (
-              <TouchableOpacity
-                key={photo.id}
-                >
+              <TouchableOpacity key={photo.id}>
                 <PhotoCard
                   key={photo.id}
                   photo={photo}
@@ -115,6 +147,18 @@ function BoardDetails({
 }
 
 const style = StyleSheet.create({
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    backgroundColor: '#F79D7D',
+    padding: 10,
+    borderRadius: 20,
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
+  },
   BoardDetailsBg: {
     flex: 1,
     backgroundColor: '#F79D7D',
@@ -136,11 +180,12 @@ const style = StyleSheet.create({
     marginLeft: 20,
   },
   textContainer: {
+    marginTop: 30,
     flexDirection: 'column',
     justifyContent: 'center',
     flex: 1,
   },
-  userIntro: {
+  boardName: {
     fontSize: 50,
     fontWeight: 'bold',
     color: '#F4F5F7',
@@ -148,15 +193,15 @@ const style = StyleSheet.create({
     marginBottom: 2,
     lineHeight: 50,
   },
-  userName: {
-    fontSize: 50,
-    fontWeight: 'bold',
+  boardDesc: {
+    fontSize: 20,
+    fontWeight: 'normal',
     color: '#F4F5F7',
     textAlign: 'left',
+    marginBottom: 2,
     lineHeight: 50,
-    width: '100%',
-    paddingRight: 10,
   },
+
   scrollContainer: {
     flex: 1,
     marginTop: 20,
@@ -201,15 +246,7 @@ const style = StyleSheet.create({
     padding: 20,
     marginTop: 20,
   },
-  boardName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  boardDescription: {
-    fontSize: 14,
-    color: '#555',
-  },
+
   photoGrid: {
     marginTop: 20,
     flexDirection: 'row',

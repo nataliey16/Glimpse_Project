@@ -1,4 +1,6 @@
 import React, {useEffect, useState} from 'react';
+import {collection, addDoc} from 'firebase/firestore';
+import {database} from '../utils/firebase';
 import {
   View,
   Text,
@@ -6,13 +8,23 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
-import uuid from 'react-native-uuid';
 
-interface BoardDataEntry {
+type Board = {
   id: string;
   name: string;
   description: string;
-}
+  photos: Photo[] | null;
+};
+
+type Photo = {
+  id: number;
+  width: number;
+  height: number;
+  src: {
+    small: string;
+    original: string;
+  };
+};
 
 function CreateBoard({
   route,
@@ -26,12 +38,6 @@ function CreateBoard({
     description: '',
   });
 
-  const getNewID = (): string => {
-    const id = String(uuid.v4());
-    console.log(`ID is : ${id}`);
-    return id;
-  };
-
   const handleInputChange = (name: string, value: string) => {
     console.log(
       setBoardForm(prevEntry => ({
@@ -41,21 +47,46 @@ function CreateBoard({
     );
   };
 
-  const handleSubmit = () => {
+  const addBoardData = async (board: Board) => {
+    try {
+      //references the board in the boards tables within the database
+      const boardRef = await addDoc(collection(database, 'boards'), {
+        board_id: board.id,
+        name: board.name,
+        description: board.description,
+        photos: board.photos,
+      });
+
+      console.log('Board written to database', boardRef);
+      console.log('Board written to database with ID:', boardRef.id);
+    } catch (error) {
+      console.error('Error adding document: ', error);
+    }
+  };
+  const handleSubmit = async () => {
     if (!boardForm.name.trim() || !boardForm.description.trim()) {
       console.log('Board name and description are required');
       return;
     }
-    const boardWithId: BoardDataEntry = {...boardForm, id: getNewID()};
 
-    console.log('Submitting board:', boardWithId);
+    const boardWithId: Board = {
+      id: '',
+      name: boardForm.name,
+      description: boardForm.description,
+      photos: [], // Initialize with an empty photos array
+    };
 
-    navigation.navigate('Profile', {
-      screen: 'MyProfile',
-      params: {newSubmittedBoard: boardWithId},
-    });
-
-    setBoardForm({name: '', description: ''});
+    try {
+      await addBoardData(boardWithId); // Save to database
+      console.log('Board successfully added to database');
+      navigation.navigate('Profile', {
+        screen: 'MyProfile',
+        params: {newSubmittedBoard: boardWithId},
+      });
+      setBoardForm({name: '', description: ''}); // Reset form
+    } catch (error) {
+      console.error('Error while submitting board:', error);
+    }
   };
 
   useEffect(() => {
@@ -100,7 +131,7 @@ function CreateBoard({
           style={style.submitBtn}
           onPress={() => {
             setBoardForm({name: '', description: ''});
-            //navigation.goBack();
+            navigation.goBack();
           }}>
           <Text style={style.submitBtnTxt}>Cancel</Text>
         </TouchableOpacity>
