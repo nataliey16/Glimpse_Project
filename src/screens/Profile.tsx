@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Pressable,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import {database} from '../utils/firebase';
 import {
@@ -44,9 +45,6 @@ function Profile({
   navigation: any;
   route: any;
 }): React.JSX.Element {
-  // const [boards, setBoards] = useState<{name: string; description: string}[]>(
-  //   [],
-  // );
   const [newBoard, setNewBoard] = useState<
     {id: string; name: string; description: string}[]
   >([]);
@@ -55,6 +53,7 @@ function Profile({
   const [editBoard, setEditBoard] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleEdit = () => {
     setEditBoard(true);
@@ -92,6 +91,7 @@ function Profile({
         route.params.newSubmittedBoard,
       ]);
       const fetchBoardsFromDB = async () => {
+        setIsLoading(true);
         try {
           const querySnapshot = await getDocs(collection(database, 'boards'));
           const boardsData: Board[] = querySnapshot.docs.map(doc => ({
@@ -105,6 +105,8 @@ function Profile({
           setBoards(boardsData);
         } catch (error) {
           console.error('Error fetching boards:', error);
+        } finally {
+          setIsLoading(false);
         }
       };
       fetchBoardsFromDB();
@@ -117,6 +119,7 @@ function Profile({
   useFocusEffect(
     React.useCallback(() => {
       const fetchBoardsFromDB = async () => {
+        setIsLoading(true);
         try {
           const querySnapshot = await getDocs(collection(database, 'boards'));
           const boardsData: Board[] = querySnapshot.docs.map(doc => ({
@@ -130,6 +133,8 @@ function Profile({
           setBoards(boardsData);
         } catch (error) {
           console.error('Error fetching boards:', error);
+        } finally {
+          setIsLoading(false);
         }
       };
       // fetchBoardsFromDB();
@@ -147,7 +152,7 @@ function Profile({
       {/* User Profile Section */}
       <View style={style.userPf}>
         <Image
-          source={{uri: 'https://via.placeholder.com/100'}}
+          source={require('../images/profile/woman_profile.jpg')}
           style={style.profileImage}
         />
         <View style={style.textContainer}>
@@ -165,8 +170,13 @@ function Profile({
         <Text style={style.moodTxt}>Mood Board</Text>
       </View>
 
-      {/* Render Boards */}
-      {boards.length === 0 ? (
+      {/* Loading Indicator */}
+      {isLoading ? (
+        <View style={style.loadingContainer}>
+          <ActivityIndicator size="large" color="#FFF" />
+          <Text style={style.loadingText}>Loading Boards...</Text>
+        </View>
+      ) : boards.length === 0 ? (
         <View style={style.createBoardSection}>
           <Text style={style.createBoardText}>Create a Board</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Create Board')}>
@@ -234,7 +244,7 @@ function Profile({
             );
           })}
           <View style={style.createBoardSection}>
-            <Text style={style.createBoardText}>Create a Board</Text>
+            <Text style={style.createBoardText}>Create New Board</Text>
             <TouchableOpacity
               onPress={() => navigation.navigate('Create Board')}>
               <Image
@@ -250,6 +260,16 @@ function Profile({
 }
 
 const style = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#FFF',
+  },
   profileBg: {
     flex: 1,
     backgroundColor: '#F79D7D',
@@ -338,8 +358,12 @@ const style = StyleSheet.create({
     color: '#F79D7D',
   },
   createBoardSection: {
-    marginTop: 40,
+    marginVertical: 20,
     alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 8,
+    borderColor: '#FFF',
+    paddingBottom: 40,
   },
   createBoardText: {
     fontSize: 18,

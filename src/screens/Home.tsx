@@ -1,7 +1,6 @@
 import React from 'react';
-import {Image, ImageBackground, StyleSheet, Text, View} from 'react-native';
+import {Image, StyleSheet, Text, View} from 'react-native';
 import AppLayout from '../layout/AppLayout';
-import {CommonStyles} from '../utils/CommonStyles';
 
 import {ImageSourcePropType} from 'react-native';
 
