@@ -7,10 +7,11 @@ import {
   View,
   TouchableOpacity,
   Dimensions,
+  Alert,
 } from 'react-native';
 import PhotoCard from '../components/PhotoCard';
 import {database} from '../utils/firebase';
-import {collection, getDocs} from 'firebase/firestore';
+import {collection, getDocs, updateDoc, doc} from 'firebase/firestore';
 
 type Photo = {
   id: number;
@@ -44,6 +45,8 @@ function BoardDetails({
   const scrollViewRef = useRef<ScrollView>(null);
   const [columns, setColumns] = useState<[Photo[], Photo[]]>([[], []]);
   const [boards, setBoards] = useState<Board[]>([]);
+  const [editMode, setEditMode] = useState(false);
+  const [firstPhoto, setFirstPhoto] = useState<Photo | null>(null);
 
   const boardId = route.params?.boardId;
   console.log(`Board ID: ${route.params?.boardId}`);
@@ -72,6 +75,7 @@ function BoardDetails({
   useEffect(() => {
     if (board?.photos) {
       distributePhotos(board.photos);
+      setFirstPhoto(board.photos[0] || null);
     }
   }, [board]);
 
@@ -89,7 +93,43 @@ function BoardDetails({
     setColumns(newColumns);
   };
 
-  const firstPhoto = board?.photos?.[0];
+  const handleDeletePhoto = async (photoId: number) => {
+    if (!board) return;
+
+    Alert.alert('Delete Photo', 'Are you sure you want to delete this photo?', [
+      {
+        text: 'Cancel',
+        style: 'cancel',
+      },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            const updatedPhotos =
+              board.photos?.filter(photo => photo.id !== photoId) || [];
+            const boardDocRef = doc(database, 'boards', board.id);
+            await updateDoc(boardDocRef, {photos: updatedPhotos});
+            setBoards(prevBoards =>
+              prevBoards.map(b =>
+                b.id === board.id ? {...b, photos: updatedPhotos} : b,
+              ),
+            );
+            // Update columns and firstPhoto state
+            distributePhotos(updatedPhotos);
+          } catch (error) {
+            console.error('Error deleting photo:', error);
+          }
+        },
+      },
+    ]);
+  };
+
+  // const firstPhoto = board?.photos?.[0];
+
+  // function handleDeletePhoto(id: number) {
+  //   throw new Error('Function not implemented.');
+  // }
 
   return (
     <View style={style.BoardDetailsBg}>
@@ -101,9 +141,9 @@ function BoardDetails({
       {/* Edit Button */}
       <TouchableOpacity
         onPress={() => {
-          console.log('Edit BoardDetails');
+          setEditMode(!editMode);
         }}>
-        <Text style={style.editText}>Edit</Text>
+        <Text style={style.editText}>{editMode ? 'Done' : 'Edit'}</Text>
       </TouchableOpacity>
 
       {/* BoardDetails Section */}
@@ -131,11 +171,14 @@ function BoardDetails({
         {columns.map((columnPhotos, columnIndex) => (
           <View key={columnIndex} style={style.column}>
             {columnPhotos.map(photo => (
-              <TouchableOpacity key={photo.id}>
+              <TouchableOpacity
+                key={photo.id}
+                onPress={() => editMode && handleDeletePhoto(photo.id)}>
                 <PhotoCard
                   key={photo.id}
                   photo={photo}
                   columnWidth={columnWidth}
+                  style={editMode ? style.editablePhoto : undefined}
                 />
               </TouchableOpacity>
             ))}
@@ -256,6 +299,9 @@ const style = StyleSheet.create({
   },
   column: {
     width: columnWidth,
+  },
+  editablePhoto: {
+    opacity: 0.5,
   },
 });
 

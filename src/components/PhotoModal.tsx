@@ -1,8 +1,16 @@
-import { View, Modal, Text, TouchableOpacity, Image, StyleSheet, Dimensions } from 'react-native';
+import {
+  View,
+  Modal,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  Dimensions,
+} from 'react-native';
 
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
-const PhotoModal = ({ photo, visible, onClose, onAddToMoodBoard,  }: any) => {
+const PhotoModal = ({photo, visible, onClose, onAddToMoodBoard}: any) => {
   if (!photo) return null;
 
   return (
@@ -10,13 +18,12 @@ const PhotoModal = ({ photo, visible, onClose, onAddToMoodBoard,  }: any) => {
       visible={visible}
       animationType="fade"
       transparent={true}
-      onRequestClose={onClose}
-    >
+      onRequestClose={onClose}>
       <View style={styles.modalOverlay}>
         <View style={styles.modalContent}>
           {/* Image */}
           <Image
-            source={{ uri: photo.src.original }}
+            source={{uri: photo.src.original}}
             style={styles.image}
             resizeMode="contain"
           />
@@ -24,10 +31,11 @@ const PhotoModal = ({ photo, visible, onClose, onAddToMoodBoard,  }: any) => {
             <Text style={styles.buttonText}>Close</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.addToMoodBoardButton} onPress={onAddToMoodBoard}>
+          <TouchableOpacity
+            style={styles.addToMoodBoardButton}
+            onPress={onAddToMoodBoard}>
             <Text style={styles.buttonText}>Add to Mood Board</Text>
           </TouchableOpacity>
-
         </View>
       </View>
     </Modal>

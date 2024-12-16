@@ -1,33 +1,39 @@
-import React, { useEffect } from 'react';
-import { View, Image, StyleSheet, Text } from 'react-native';
+import React from 'react';
+import {View, Image, StyleSheet, ViewStyle, ImageStyle} from 'react-native';
 
 type Photo = {
-    id: number;
-    width: number;
-    height: number;
-    src: {
-      small: string;
-    };
+  id: number;
+  width: number;
+  height: number;
+  src: {
+    small: string;
+  };
 };
 
 type PhotoCardProps = {
-    photo: Photo;
-    columnWidth: number;
+  photo: Photo;
+  columnWidth: number;
+  style?: ViewStyle | ImageStyle;
 };
 
-const PhotoCard = ({ photo, columnWidth }: PhotoCardProps) => {
-    const imageWidth = columnWidth;
-    const imageHeight = (photo.height / photo.width) * imageWidth;
+const PhotoCard = ({photo, columnWidth, style}: PhotoCardProps) => {
+  const imageWidth = columnWidth;
+  const imageHeight = (photo.height / photo.width) * imageWidth;
 
-    return (
-        <View style={[styles.photoContainer, { width: columnWidth, height: imageHeight }]}>
-            <Image
-                source={{ uri: photo.src.small }}
-                style={styles.image}
-                resizeMode="cover"
-            />
-        </View>
-    );
+  return (
+    <View
+      style={[
+        styles.photoContainer,
+        {width: columnWidth, height: imageHeight},
+        style,
+      ]}>
+      <Image
+        source={{uri: photo.src.small}}
+        style={styles.image}
+        resizeMode="cover"
+      />
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
