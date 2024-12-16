@@ -64,13 +64,14 @@ function CreateBoard({
     try {
       //references the board in the boards tables within the database
       const boardRef = await addDoc(collection(database, 'boards'), {
-        board_id: board.id,
+        // board_id: board.id,
         name: board.name,
         description: board.description,
         photos: board.photos,
       });
 
       console.log('Board written to database', boardRef);
+      console.log('Board written to database with ID:', boardRef.id);
     } catch (error) {
       console.error('Error adding document: ', error);
     }

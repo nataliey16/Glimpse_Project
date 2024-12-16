@@ -10,7 +10,13 @@ import {
   FlatList,
 } from 'react-native';
 import {database} from '../utils/firebase';
-import {collection, getDocs} from 'firebase/firestore';
+import {
+  collection,
+  getDocs,
+  deleteDoc,
+  doc,
+  deleteField,
+} from 'firebase/firestore';
 import {useFocusEffect} from '@react-navigation/native';
 import DeleteModal from '../components/DeleteModal';
 
@@ -47,6 +53,36 @@ function Profile({
 
   const [boards, setBoards] = useState<Board[]>([]);
   const [editBoard, setEditBoard] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
+
+  const handleEdit = () => {
+    setEditBoard(true);
+  };
+
+  const openDeleteModal = (boardId: string) => {
+    console.log('Open delete modal for modal id:', boardId);
+    setIsModalVisible(true);
+    setSelectedBoardId(boardId);
+  };
+
+  const handleCancelModal = () => {
+    setIsModalVisible(false);
+  };
+
+  const handleDeleteModal = async (boardId: string) => {
+    try {
+      const boardDocRef = doc(database, 'boards', boardId);
+      await deleteDoc(boardDocRef);
+
+      console.log(`Delete board with id:${boardId}`);
+
+      setBoards(prevBoards => prevBoards.filter(board => board.id !== boardId));
+      setIsModalVisible(false);
+    } catch (error) {
+      console.error('Error deleting board:', error);
+    }
+  };
 
   useEffect(() => {
     if (route.params?.newSubmittedBoard) {
@@ -60,7 +96,8 @@ function Profile({
         try {
           const querySnapshot = await getDocs(collection(database, 'boards'));
           const boardsData: Board[] = querySnapshot.docs.map(doc => ({
-            id: doc.data().board_id,
+            // id: doc.data().board_id,
+            id: doc.id,
             name: doc.data().name,
             description: doc.data().description,
             photos: doc.data().photos,
@@ -85,7 +122,8 @@ function Profile({
         try {
           const querySnapshot = await getDocs(collection(database, 'boards'));
           const boardsData: Board[] = querySnapshot.docs.map(doc => ({
-            id: doc.data().board_id,
+            id: doc.id,
+            // id: doc.data().board_id,
             name: doc.data().name,
             description: doc.data().description,
             photos: doc.data().photos,
@@ -100,10 +138,6 @@ function Profile({
       setTimeout(fetchBoardsFromDB, 3000);
     }, []),
   );
-
-  const handleEdit = () => {
-    setEditBoard(true);
-  };
 
   return (
     <View style={style.profileBg}>
@@ -123,7 +157,6 @@ function Profile({
           <Text style={style.userName}>Gabrielle!</Text>
         </View>
       </View>
-      <DeleteModal />
 
       {/* Content Section */}
       <View style={style.profileText}>
@@ -179,7 +212,8 @@ function Profile({
                   {editBoard && (
                     <View style={style.editButtonView}>
                       <TouchableOpacity
-                        style={[style.editButton, style.deleteButton]}>
+                        style={[style.editButton, style.deleteButton]}
+                        onPress={() => openDeleteModal(board.id)}>
                         <Text style={style.editButtonText}>Delete</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
@@ -188,6 +222,14 @@ function Profile({
                         <Text style={style.editButtonText}>Cancel</Text>
                       </TouchableOpacity>
                     </View>
+                  )}
+
+                  {isModalVisible && selectedBoardId && (
+                    <DeleteModal
+                      handleCancelModal={handleCancelModal}
+                      handleDeleteModal={handleDeleteModal}
+                      boardId={board.id}
+                    />
                   )}
                 </View>
                 <View style={style.createBoardSection}>

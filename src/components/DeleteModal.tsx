@@ -10,10 +10,17 @@ import {
 
 const {width, height} = Dimensions.get('window');
 
-function UpdateModal(): React.JSX.Element {
-  const [modalVisible, setModalVisible] = useState(true);
+interface DeleteModalProps {
+  handleCancelModal: () => void;
+  handleDeleteModal: (boardId: string) => void;
+  boardId: string;
+}
+
+function DeleteModal(props: DeleteModalProps): React.JSX.Element {
+  const {handleCancelModal, handleDeleteModal, boardId} = props;
+
   return (
-    <Modal visible={modalVisible} transparent={true} animationType="slide">
+    <Modal visible={true} transparent={true} animationType="slide">
       <View style={style.modalOverlay}>
         <View style={style.modalContent}>
           <Text style={style.modalTitle}>
@@ -21,17 +28,15 @@ function UpdateModal(): React.JSX.Element {
             Are you sure you want to delete board?
           </Text>
         </View>
-        <View
-          style={[
-            style.editButtonView,
-            {flexDirection: 'row', justifyContent: 'space-between'},
-          ]}>
+        <View style={[style.editButtonView]}>
           <TouchableOpacity
             style={[style.editButton, style.cancelButton]}
-            onPress={() => setModalVisible(false)}>
+            onPress={handleCancelModal}>
             <Text style={style.editButtonText}>Cancel</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[style.editButton, style.deleteButton]}>
+          <TouchableOpacity
+            style={[style.editButton, style.deleteButton]}
+            onPress={() => handleDeleteModal(boardId)}>
             <Text style={style.editButtonText}>Delete</Text>
           </TouchableOpacity>
         </View>
@@ -90,4 +95,4 @@ const style = StyleSheet.create({
   },
 });
 
-export default UpdateModal;
+export default DeleteModal;
