@@ -91,7 +91,6 @@ function Profile({
         ...prevBoards,
         route.params.newSubmittedBoard,
       ]);
-      // navigation.setParams({newBoard: null}); // Clear params to avoid duplicate additions
       const fetchBoardsFromDB = async () => {
         try {
           const querySnapshot = await getDocs(collection(database, 'boards'));
@@ -109,7 +108,6 @@ function Profile({
         }
       };
       fetchBoardsFromDB();
-      // setTimeout(fetchBoardsFromDB, 3000);
 
       // Clear params to avoid re-triggering the effect
       navigation.setParams({newSubmittedBoard: null});
@@ -232,19 +230,19 @@ function Profile({
                     />
                   )}
                 </View>
-                <View style={style.createBoardSection}>
-                  <Text style={style.createBoardText}>Create a Board</Text>
-                  <TouchableOpacity
-                    onPress={() => navigation.navigate('Create Board')}>
-                    <Image
-                      source={require('../assets/icons/create.png')}
-                      style={style.iconImg}
-                    />
-                  </TouchableOpacity>
-                </View>
               </Pressable>
             );
           })}
+          <View style={style.createBoardSection}>
+            <Text style={style.createBoardText}>Create a Board</Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Create Board')}>
+              <Image
+                source={require('../assets/icons/create.png')}
+                style={style.iconImg}
+              />
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       )}
     </View>

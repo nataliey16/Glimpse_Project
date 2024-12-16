@@ -54,7 +54,7 @@ function BoardDetails({
       try {
         const querySnapshot = await getDocs(collection(database, 'boards'));
         const boardsData: Board[] = querySnapshot.docs.map(doc => ({
-          id: doc.data().board_id,
+          id: doc.id,
           name: doc.data().name,
           description: doc.data().description,
           photos: doc.data().photos,

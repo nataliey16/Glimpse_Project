@@ -10,12 +10,6 @@ import {
 } from 'react-native';
 import uuid from 'react-native-uuid';
 
-interface BoardDataEntry {
-  id: string;
-  name: string;
-  description: string;
-}
-
 type Board = {
   id: string;
   name: string;
@@ -64,7 +58,7 @@ function CreateBoard({
     try {
       //references the board in the boards tables within the database
       const boardRef = await addDoc(collection(database, 'boards'), {
-        // board_id: board.id,
+        board_id: board.id,
         name: board.name,
         description: board.description,
         photos: board.photos,
@@ -81,11 +75,9 @@ function CreateBoard({
       console.log('Board name and description are required');
       return;
     }
-    // const boardWithId: Board = {...boardForm, id: getNewID()};
 
-    // console.log('Submitting board:', boardWithId);
     const boardWithId: Board = {
-      id: getNewID(),
+      id: '',
       name: boardForm.name,
       description: boardForm.description,
       photos: [], // Initialize with an empty photos array
