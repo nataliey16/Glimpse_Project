@@ -8,7 +8,6 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
-import uuid from 'react-native-uuid';
 
 type Board = {
   id: string;
@@ -38,12 +37,6 @@ function CreateBoard({
     name: '',
     description: '',
   });
-
-  const getNewID = (): string => {
-    const id = String(uuid.v4());
-    console.log(`ID is : ${id}`);
-    return id;
-  };
 
   const handleInputChange = (name: string, value: string) => {
     console.log(
