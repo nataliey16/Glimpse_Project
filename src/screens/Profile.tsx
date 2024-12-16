@@ -45,9 +45,6 @@ function Profile({
   navigation: any;
   route: any;
 }): React.JSX.Element {
-  // const [boards, setBoards] = useState<{name: string; description: string}[]>(
-  //   [],
-  // );
   const [newBoard, setNewBoard] = useState<
     {id: string; name: string; description: string}[]
   >([]);
@@ -155,7 +152,7 @@ function Profile({
       {/* User Profile Section */}
       <View style={style.userPf}>
         <Image
-          source={{uri: 'https://via.placeholder.com/100'}}
+          source={require('../images/profile/woman_profile.jpg')}
           style={style.profileImage}
         />
         <View style={style.textContainer}>
@@ -247,7 +244,7 @@ function Profile({
             );
           })}
           <View style={style.createBoardSection}>
-            <Text style={style.createBoardText}>Create a Board</Text>
+            <Text style={style.createBoardText}>Create New Board</Text>
             <TouchableOpacity
               onPress={() => navigation.navigate('Create Board')}>
               <Image
@@ -361,8 +358,12 @@ const style = StyleSheet.create({
     color: '#F79D7D',
   },
   createBoardSection: {
-    marginTop: 40,
+    marginVertical: 20,
     alignItems: 'center',
+    borderWidth: 1,
+    borderRadius: 8,
+    borderColor: '#FFF',
+    paddingBottom: 40,
   },
   createBoardText: {
     fontSize: 18,
