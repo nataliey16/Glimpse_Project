@@ -16,6 +16,8 @@ import {
 import PhotoCard from '../components/PhotoCard';
 import PhotoModal from '../components/PhotoModal';
 import StoredInModal from '../components/StoredInModal';
+import AppLayout from '../layout/AppLayout';
+import WelcomeModal from '../components/WelcomeModal';
 
 type Photo = {
   id: number;
@@ -160,62 +162,67 @@ const SearchScreen = ({navigation}: {navigation: any}) => {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Search Photos..."
-        value={keyword}
-        onChangeText={setKeyword}
-        onSubmitEditing={searchPhotos}
-      />
+    <AppLayout>
+      <View style={styles.container}>
+        <WelcomeModal />
+        <TextInput
+          style={styles.input}
+          placeholder="Search Photos..."
+          value={keyword}
+          onChangeText={setKeyword}
+          onSubmitEditing={searchPhotos}
+        />
 
-      {loading}
-      {error && <Text style={styles.error}>{error}</Text>}
+        {loading}
+        {error && <Text style={styles.error}>{error}</Text>}
 
-      <Text style={styles.featuredText}>
-        {keyword ? `${keyword}` : `Curated`} Photos
-      </Text>
+        <Text style={styles.featuredText}>
+          {keyword ? `${keyword}` : `Curated`} Photos
+        </Text>
 
-      <ScrollView ref={scrollViewRef} contentContainerStyle={styles.photoGrid}>
-        {columns.map((columnPhotos, columnIndex) => (
-          <View key={columnIndex} style={styles.column}>
-            {columnPhotos.map(photo => (
-              <TouchableOpacity
-                key={photo.id}
-                onPress={() => openPhotoModal(photo)}>
-                <PhotoCard
+        <ScrollView
+          ref={scrollViewRef}
+          contentContainerStyle={styles.photoGrid}>
+          {columns.map((columnPhotos, columnIndex) => (
+            <View key={columnIndex} style={styles.column}>
+              {columnPhotos.map(photo => (
+                <TouchableOpacity
                   key={photo.id}
-                  photo={photo}
-                  columnWidth={columnWidth}
-                />
-              </TouchableOpacity>
-            ))}
-          </View>
-        ))}
-      </ScrollView>
+                  onPress={() => openPhotoModal(photo)}>
+                  <PhotoCard
+                    key={photo.id}
+                    photo={photo}
+                    columnWidth={columnWidth}
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
+          ))}
+        </ScrollView>
 
-      {/* selected photo */}
-      {selectedPhoto && (
-        <PhotoModal
-          photo={selectedPhoto}
-          visible={modalVisible}
-          onClose={closePhotoModal}
-          onAddToMoodBoard={addToMoodBoard}
-        />
-      )}
+        {/* selected photo */}
+        {selectedPhoto && (
+          <PhotoModal
+            photo={selectedPhoto}
+            visible={modalVisible}
+            onClose={closePhotoModal}
+            onAddToMoodBoard={addToMoodBoard}
+          />
+        )}
 
-      {/* Stored In Modal */}
-      {showBoardOptions && selectedPhoto && (
-        <StoredInModal
-          visible={showBoardOptions}
-          onClose={handleCloseStoredInModal}
-          onSelectExistingBoard={handleSelectExistingBoard}
-          onCreateNewBoard={handleCreateNewBoard}
-          navigation={navigation}
-          photo={selectedPhoto}
-        />
-      )}
-    </View>
+        {/* Stored In Modal */}
+        {showBoardOptions && selectedPhoto && (
+          <StoredInModal
+            visible={showBoardOptions}
+            onClose={handleCloseStoredInModal}
+            onSelectExistingBoard={handleSelectExistingBoard}
+            onCreateNewBoard={handleCreateNewBoard}
+            navigation={navigation}
+            photo={selectedPhoto}
+          />
+        )}
+      </View>
+    </AppLayout>
   );
 };
 

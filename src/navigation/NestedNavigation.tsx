@@ -7,50 +7,50 @@ import ProfileStackNav from './ProfileStackNav';
 import SearchStackNav from './SearchStackNav';
 import CreateBoardStackNav from './CreateBoardStackNav';
 import TabIcon from '../components/TabIcon';
-import { BoardsProvider } from '../components/BoardsContext';
+import {BoardsProvider} from '../components/BoardsContext';
 
 const NestedNav = createBottomTabNavigator();
 
 function NestedNavigation(): React.JSX.Element {
   return (
     <BoardsProvider>
-    <View style={styles.tabView}>
-      <NavigationContainer>
-        <NestedNav.Navigator
-          screenOptions={({route}) => ({
-            tabBarIcon: ({
-              focused,
-              color,
-              size,
-            }: {
-              focused: boolean;
-              color: string;
-              size: number;
-            }) => {
-              return (
-                <TabIcon route={route.name} focused={focused} color={color} />
-              );
-            },
-            tabBarStyle: styles.tabBarStyle,
-            tabBarShowLabel: false, // Hides the tab labels
-            headerShown: false,
-            tabBarActiveTintColor: '#C3CFFA',
-          })}>
-          <NestedNav.Screen
+      <View style={styles.tabView}>
+        <NavigationContainer>
+          <NestedNav.Navigator
+            screenOptions={({route}) => ({
+              tabBarIcon: ({
+                focused,
+                color,
+                size,
+              }: {
+                focused: boolean;
+                color: string;
+                size: number;
+              }) => {
+                return (
+                  <TabIcon route={route.name} focused={focused} color={color} />
+                );
+              },
+              tabBarStyle: styles.tabBarStyle,
+              tabBarShowLabel: false, // Hides the tab labels
+              headerShown: false,
+              tabBarActiveTintColor: '#C3CFFA',
+            })}>
+            {/* <NestedNav.Screen
             name="Home"
-            component={HomeStackNav}></NestedNav.Screen>
-          <NestedNav.Screen
-            name="Search"
-            component={SearchStackNav}></NestedNav.Screen>
-          <NestedNav.Screen
-            name="Create Board"
-            component={CreateBoardStackNav}></NestedNav.Screen>
-          <NestedNav.Screen
-            name="Profile"
-            component={ProfileStackNav}></NestedNav.Screen>
-        </NestedNav.Navigator>
-      </NavigationContainer>
-    </View>
+            component={HomeStackNav}></NestedNav.Screen> */}
+            <NestedNav.Screen
+              name="Search"
+              component={SearchStackNav}></NestedNav.Screen>
+            <NestedNav.Screen
+              name="Create Board"
+              component={CreateBoardStackNav}></NestedNav.Screen>
+            <NestedNav.Screen
+              name="Profile"
+              component={ProfileStackNav}></NestedNav.Screen>
+          </NestedNav.Navigator>
+        </NavigationContainer>
+      </View>
     </BoardsProvider>
   );
 }
