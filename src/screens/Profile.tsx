@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Pressable,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
 import {database} from '../utils/firebase';
 import {
@@ -55,6 +56,7 @@ function Profile({
   const [editBoard, setEditBoard] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleEdit = () => {
     setEditBoard(true);
@@ -92,6 +94,7 @@ function Profile({
         route.params.newSubmittedBoard,
       ]);
       const fetchBoardsFromDB = async () => {
+        setIsLoading(true);
         try {
           const querySnapshot = await getDocs(collection(database, 'boards'));
           const boardsData: Board[] = querySnapshot.docs.map(doc => ({
@@ -105,6 +108,8 @@ function Profile({
           setBoards(boardsData);
         } catch (error) {
           console.error('Error fetching boards:', error);
+        } finally {
+          setIsLoading(false);
         }
       };
       fetchBoardsFromDB();
@@ -117,6 +122,7 @@ function Profile({
   useFocusEffect(
     React.useCallback(() => {
       const fetchBoardsFromDB = async () => {
+        setIsLoading(true);
         try {
           const querySnapshot = await getDocs(collection(database, 'boards'));
           const boardsData: Board[] = querySnapshot.docs.map(doc => ({
@@ -130,6 +136,8 @@ function Profile({
           setBoards(boardsData);
         } catch (error) {
           console.error('Error fetching boards:', error);
+        } finally {
+          setIsLoading(false);
         }
       };
       // fetchBoardsFromDB();
@@ -165,8 +173,13 @@ function Profile({
         <Text style={style.moodTxt}>Mood Board</Text>
       </View>
 
-      {/* Render Boards */}
-      {boards.length === 0 ? (
+      {/* Loading Indicator */}
+      {isLoading ? (
+        <View style={style.loadingContainer}>
+          <ActivityIndicator size="large" color="#FFF" />
+          <Text style={style.loadingText}>Loading Boards...</Text>
+        </View>
+      ) : boards.length === 0 ? (
         <View style={style.createBoardSection}>
           <Text style={style.createBoardText}>Create a Board</Text>
           <TouchableOpacity onPress={() => navigation.navigate('Create Board')}>
@@ -250,6 +263,16 @@ function Profile({
 }
 
 const style = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#FFF',
+  },
   profileBg: {
     flex: 1,
     backgroundColor: '#F79D7D',
