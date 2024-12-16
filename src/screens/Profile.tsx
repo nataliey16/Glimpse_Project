@@ -7,7 +7,7 @@ import {
   View,
   TouchableOpacity,
   Pressable,
-  FlatList,
+  // FlatList,
   ActivityIndicator,
 } from 'react-native';
 import {database} from '../utils/firebase';
@@ -16,7 +16,7 @@ import {
   getDocs,
   deleteDoc,
   doc,
-  deleteField,
+  // deleteField,
 } from 'firebase/firestore';
 import {useFocusEffect} from '@react-navigation/native';
 import DeleteModal from '../components/DeleteModal';
@@ -45,10 +45,6 @@ function Profile({
   navigation: any;
   route: any;
 }): React.JSX.Element {
-  const [newBoard, setNewBoard] = useState<
-    {id: string; name: string; description: string}[]
-  >([]);
-
   const [boards, setBoards] = useState<Board[]>([]);
   const [editBoard, setEditBoard] = useState(false);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -86,10 +82,7 @@ function Profile({
   useEffect(() => {
     if (route.params?.newSubmittedBoard) {
       console.log('Received submitted board:', route.params.newSubmittedBoard);
-      setNewBoard(prevBoards => [
-        ...prevBoards,
-        route.params.newSubmittedBoard,
-      ]);
+      setBoards(prevBoards => [...prevBoards, route.params.newSubmittedBoard]);
       const fetchBoardsFromDB = async () => {
         setIsLoading(true);
         try {
@@ -191,8 +184,8 @@ function Profile({
           {boards.map(board => {
             const fullBoard = boards.find(b => b.id === board.id);
             const firstPhotoUri = fullBoard?.photos?.[0]?.src?.small;
-            console.log(`fullBoard`, fullBoard);
-            console.log(`firstPhotoUri`, firstPhotoUri);
+            console.log('fullBoard', fullBoard);
+            console.log('firstPhotoUri', firstPhotoUri);
 
             return (
               <Pressable
@@ -208,14 +201,19 @@ function Profile({
                     {board.description}
                   </Text>
 
-                  {firstPhotoUri ? (
-                    <Image
-                      source={{uri: firstPhotoUri}}
-                      style={style.profileImage}
-                    />
-                  ) : (
-                    <Text>No Image Now</Text>
-                  )}
+                  <View style={style.photoRow}>
+                    {fullBoard?.photos?.slice(0, 3).map((photo, index) => (
+                      <Image
+                        key={index}
+                        source={{uri: photo.src.small}}
+                        style={style.boardPhoto}
+                      />
+                    ))}
+
+                    {(!fullBoard?.photos || fullBoard.photos.length === 0) && (
+                      <Text style={style.noPhotosText}>No Images</Text>
+                    )}
+                  </View>
 
                   {editBoard && (
                     <View style={style.editButtonView}>
@@ -391,6 +389,22 @@ const style = StyleSheet.create({
   boardDescription: {
     fontSize: 14,
     color: '#555',
+  },
+  photoRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    marginTop: 10,
+  },
+  boardPhoto: {
+    width: 80,
+    height: 80,
+    borderRadius: 10,
+    marginRight: 5,
+  },
+  noPhotosText: {
+    fontSize: 12,
+    color: '#777',
+    marginTop: 5,
   },
 });
 
