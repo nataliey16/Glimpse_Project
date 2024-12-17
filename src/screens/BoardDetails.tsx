@@ -314,10 +314,6 @@ const style = StyleSheet.create({
     borderRadius: 50,
     marginRight: 10,
   },
-  BoardDetailsText: {
-    marginTop: 20,
-    marginLeft: 20,
-  },
   textContainer: {
     marginTop: 0,
     marginBottom: 20,
@@ -339,8 +335,12 @@ const style = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'normal',
     color: '#F4F5F7',
-    textAlign: 'left',
+    textAlign: 'center',
     marginBottom: 10,
+    alignContent: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
   },
 
   scrollContainer: {
@@ -387,7 +387,6 @@ const style = StyleSheet.create({
     padding: 20,
     marginTop: 20,
   },
-
   photoGrid: {
     marginTop: 20,
     flexDirection: 'row',
@@ -436,9 +435,9 @@ const style = StyleSheet.create({
   },
 
   modalImage: {
-    width: '90%',
-    height: '90%',
-    borderRadius: 10,
+    resizeMode: 'contain',
+    width: '80%',
+    height: '80%',
   },
 
   editablePhoto: {
@@ -454,6 +453,7 @@ const style = StyleSheet.create({
     textShadowRadius: 10,
     borderColor: '#C3CFFA',
     marginBottom: 10,
+    marginRight: 'auto',
   },
   inputField: {
     width: '100%',

@@ -343,24 +343,6 @@ const style = StyleSheet.create({
     textAlign: 'right',
     paddingRight: 20,
   },
-  editButtonView: {
-    padding: 10,
-  },
-  editButton: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    padding: 5,
-  },
-  deleteButton: {
-    position: 'absolute',
-    bottom: 10,
-    right: 10,
-  },
-  cancelButton: {
-    position: 'absolute',
-    bottom: 10,
-    left: 10,
-  },
   editButtonText: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -397,10 +379,6 @@ const style = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
-  },
-  boardDescription: {
-    fontSize: 14,
-    color: '#555',
   },
   photoRow: {
     flexDirection: 'row',
