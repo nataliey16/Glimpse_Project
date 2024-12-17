@@ -16,6 +16,8 @@ import {
   getDocs,
   deleteDoc,
   doc,
+  query,
+  orderBy,
   // deleteField,
 } from 'firebase/firestore';
 import {useFocusEffect} from '@react-navigation/native';
@@ -56,10 +58,16 @@ function Profile({
   };
 
   const openDeleteModal = (boardId: string) => {
-    console.log('Open delete modal for modal id:', boardId);
-    setIsModalVisible(true);
-    setSelectedBoardId(boardId);
+    if (!isModalVisible) {
+      console.log('Open delete modal for modal id:', boardId);
+      setSelectedBoardId(boardId);
+      setIsModalVisible(true);
+    }
   };
+  //   console.log('Open delete modal for modal id:', boardId);
+  //   setIsModalVisible(true);
+  //   setSelectedBoardId(boardId);
+  // };
 
   const handleCancelModal = () => {
     setIsModalVisible(false);
@@ -67,73 +75,123 @@ function Profile({
 
   const handleDeleteModal = async (boardId: string) => {
     try {
+      console.log('Attempting to delete board with ID:', boardId);
       const boardDocRef = doc(database, 'boards', boardId);
       await deleteDoc(boardDocRef);
 
       console.log(`Delete board with id:${boardId}`);
 
-      setBoards(prevBoards => prevBoards.filter(board => board.id !== boardId));
+      setBoards(prevBoards => {
+        console.log('Current boards:', prevBoards);
+        const filteredBoards = prevBoards.filter(board => board.id !== boardId);
+        console.log('Boards after deletion:', filteredBoards);
+        return filteredBoards;
+      });
       setIsModalVisible(false);
     } catch (error) {
       console.error('Error deleting board:', error);
     }
   };
 
-  useEffect(() => {
-    if (route.params?.newSubmittedBoard) {
-      console.log('Received submitted board:', route.params.newSubmittedBoard);
-      setBoards(prevBoards => [...prevBoards, route.params.newSubmittedBoard]);
-      const fetchBoardsFromDB = async () => {
-        setIsLoading(true);
-        try {
-          const querySnapshot = await getDocs(collection(database, 'boards'));
-          const boardsData: Board[] = querySnapshot.docs.map(doc => ({
-            // id: doc.data().board_id,
-            id: doc.id,
-            name: doc.data().name,
-            description: doc.data().description,
-            photos: doc.data().photos,
-          }));
-          console.log('Fetched Boards:', boardsData);
-          setBoards(boardsData);
-        } catch (error) {
-          console.error('Error fetching boards:', error);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      fetchBoardsFromDB();
+  const fetchBoardsFromDB = async () => {
+    setIsLoading(true);
+    try {
+      const querySnapshot = await getDocs(
+        query(collection(database, 'boards'), orderBy('createdAt', 'desc')),
+      );
 
-      // Clear params to avoid re-triggering the effect
-      navigation.setParams({newSubmittedBoard: null});
+      const boardsData: Board[] = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        name: doc.data().name,
+        description: doc.data().description,
+        photos: doc.data().photos || [],
+      }));
+      console.log('Fetched Boards:', boardsData);
+      setBoards(boardsData);
+    } catch (error) {
+      console.error('Error fetching boards:', error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [route.params?.newSubmittedBoard]);
+  };
 
   useFocusEffect(
     React.useCallback(() => {
-      const fetchBoardsFromDB = async () => {
-        setIsLoading(true);
-        try {
-          const querySnapshot = await getDocs(collection(database, 'boards'));
-          const boardsData: Board[] = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            // id: doc.data().board_id,
-            name: doc.data().name,
-            description: doc.data().description,
-            photos: doc.data().photos,
-          }));
-          console.log('useFocusEffect Fetched Boards:', boardsData);
-          setBoards(boardsData);
-        } catch (error) {
-          console.error('Error fetching boards:', error);
-        } finally {
-          setIsLoading(false);
+      const fetchData = async () => {
+        if (route.params?.newSubmittedBoard) {
+          console.log(
+            'Received submitted board:',
+            route.params.newSubmittedBoard,
+          );
+          setBoards(prevBoards => [
+            route.params.newSubmittedBoard,
+            ...prevBoards,
+          ]);
+          navigation.setParams({newSubmittedBoard: null}); // Clear params
+        } else {
+          await fetchBoardsFromDB(); // Regular fetch when screen focuses
         }
       };
-      // fetchBoardsFromDB();
-      setTimeout(fetchBoardsFromDB, 3000);
-    }, []),
+
+      fetchData();
+    }, [route.params?.newSubmittedBoard]),
   );
+
+  // useEffect(() => {
+  //   if (route.params?.newSubmittedBoard) {
+  //     console.log('Received submitted board:', route.params.newSubmittedBoard);
+  //     setBoards(prevBoards => [...prevBoards, route.params.newSubmittedBoard]);
+  //     const fetchBoardsFromDB = async () => {
+  //       setIsLoading(true);
+  //       try {
+  //         const querySnapshot = await getDocs(collection(database, 'boards'));
+  //         const boardsData: Board[] = querySnapshot.docs.map(doc => ({
+  //           // id: doc.data().board_id,
+  //           id: doc.id,
+  //           name: doc.data().name,
+  //           description: doc.data().description,
+  //           photos: doc.data().photos,
+  //         }));
+  //         console.log('Fetched Boards:', boardsData);
+  //         setBoards(boardsData);
+  //       } catch (error) {
+  //         console.error('Error fetching boards:', error);
+  //       } finally {
+  //         setIsLoading(false);
+  //       }
+  //     };
+  //     fetchBoardsFromDB();
+
+  //     // Clear params to avoid re-triggering the effect
+  //     navigation.setParams({newSubmittedBoard: null});
+  //   }
+  // }, [route.params?.newSubmittedBoard]);
+
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     const fetchBoardsFromDB = async () => {
+  //       setIsLoading(true);
+  //       try {
+  //         const querySnapshot = await getDocs(collection(database, 'boards'));
+  //         const boardsData: Board[] = querySnapshot.docs.map(doc => ({
+  //           id: doc.id,
+  //           // id: doc.data().board_id,
+  //           name: doc.data().name,
+  //           description: doc.data().description,
+  //           photos: doc.data().photos,
+  //         }));
+  //         console.log('useFocusEffect Fetched Boards:', boardsData);
+  //         setBoards(boardsData);
+  //       } catch (error) {
+  //         console.error('Error fetching boards:', error);
+  //       } finally {
+  //         setIsLoading(false);
+  //       }
+  //     };
+  //     // fetchBoardsFromDB();
+  //     setTimeout(fetchBoardsFromDB, 3000);
+  //   }, []),
+  // );
 
   return (
     <View style={style.profileBg}>
@@ -144,13 +202,14 @@ function Profile({
 
       {/* User Profile Section */}
       <View style={style.userPf}>
-        <Image
+        {/* <Image
           source={require('../images/profile/woman_profile.jpg')}
           style={style.profileImage}
-        />
+        /> */}
         <View style={style.textContainer}>
-          <Text style={style.userIntro}>Hi,</Text>
-          <Text style={style.userName}>Gabrielle!</Text>
+          <Text style={style.userIntro}>Create your Vision with</Text>
+          <Text style={style.headerTxt}>GLIMPSE</Text>
+          {/* <Text style={style.userName}></Text> */}
         </View>
       </View>
 
@@ -160,7 +219,7 @@ function Profile({
         <Text style={style.longContent}>
           Your ideas, moods, and dreams all in one place.
         </Text>
-        <Text style={style.moodTxt}>Mood Board</Text>
+        {/* <Text style={style.moodTxt}>Mood Board</Text> */}
       </View>
 
       {/* Loading Indicator */}
@@ -196,48 +255,50 @@ function Profile({
                   });
                 }}>
                 <View style={style.boardCard}>
-                  <Text style={style.boardName}>{board.name}</Text>
-                  <Text style={style.boardDescription}>
-                    {board.description}
-                  </Text>
+                  {/* Board Name */}
+                  <View style={style.boardHeader}>
+                    <Text style={style.boardName}>{board.name}</Text>
 
+                    {/* Edit Icons at the Top-Right */}
+                    {editBoard && (
+                      <View style={style.editIconsContainer}>
+                        <TouchableOpacity
+                          style={style.deleteIcon}
+                          onPress={() => openDeleteModal(board.id)}>
+                          <Text style={style.iconText}>Delete</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={style.cancelIcon}
+                          onPress={() => setEditBoard(false)}>
+                          <Text style={style.iconText}>Cancel</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </View>
+                  {/* Photos Row */}
                   <View style={style.photoRow}>
-                    {fullBoard?.photos?.slice(0, 3).map((photo, index) => (
+                    {fullBoard?.photos?.slice(0, 4).map((photo, index) => (
                       <Image
                         key={index}
                         source={{uri: photo.src.small}}
                         style={style.boardPhoto}
                       />
                     ))}
-
                     {(!fullBoard?.photos || fullBoard.photos.length === 0) && (
                       <Text style={style.noPhotosText}>No Images</Text>
                     )}
                   </View>
-
-                  {editBoard && (
-                    <View style={style.editButtonView}>
-                      <TouchableOpacity
-                        style={[style.editButton, style.deleteButton]}
-                        onPress={() => openDeleteModal(board.id)}>
-                        <Text style={style.editButtonText}>Delete</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={[style.editButton, style.cancelButton]}
-                        onPress={() => setEditBoard(false)}>
-                        <Text style={style.editButtonText}>Cancel</Text>
-                      </TouchableOpacity>
-                    </View>
-                  )}
-
-                  {isModalVisible && selectedBoardId && (
-                    <DeleteModal
-                      handleCancelModal={handleCancelModal}
-                      handleDeleteModal={handleDeleteModal}
-                      boardId={board.id}
-                    />
-                  )}
                 </View>
+
+                {isModalVisible && (
+                  <DeleteModal
+                    handleCancelModal={handleCancelModal}
+                    handleDeleteModal={() =>
+                      handleDeleteModal(selectedBoardId!)
+                    }
+                    boardId={selectedBoardId!}
+                  />
+                )}
               </Pressable>
             );
           })}
@@ -292,23 +353,32 @@ const style = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'center',
     flex: 1,
+    alignContent: 'center',
+    alignItems: 'center',
+    paddingRight: 20,
   },
   userIntro: {
-    fontSize: 50,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#F4F5F7',
     textAlign: 'left',
     marginBottom: 2,
     lineHeight: 50,
+    justifyContent: 'center',
+    alignContent: 'center',
+    alignItems: 'center',
   },
   userName: {
     fontSize: 50,
     fontWeight: 'bold',
     color: '#F4F5F7',
-    textAlign: 'left',
+    textAlign: 'center',
     lineHeight: 50,
     width: '100%',
-    paddingRight: 10,
+    // paddingRight: 10,
+    justifyContent: 'center',
+    alignContent: 'center',
+    alignItems: 'center',
   },
   scrollContainer: {
     flex: 1,
@@ -316,8 +386,9 @@ const style = StyleSheet.create({
     paddingHorizontal: 20,
   },
   longContent: {
-    fontSize: 16,
+    fontSize: 14,
     color: '#FFF',
+    textAlign: 'center',
   },
   moodTxt: {
     fontSize: 20,
@@ -332,28 +403,10 @@ const style = StyleSheet.create({
     textAlign: 'right',
     paddingRight: 20,
   },
-  editButtonView: {
-    padding: 10,
-  },
-  editButton: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    padding: 5,
-  },
-  deleteButton: {
-    position: 'absolute',
-    bottom: 10,
-    right: 10,
-  },
-  cancelButton: {
-    position: 'absolute',
-    bottom: 10,
-    left: 10,
-  },
   editButtonText: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#F79D7D',
+    color: '#5856CB',
   },
   createBoardSection: {
     marginVertical: 20,
@@ -376,19 +429,16 @@ const style = StyleSheet.create({
     marginTop: 10,
   },
   boardCard: {
-    backgroundColor: '#E8EAF6',
+    backgroundColor: 'rgba(232, 234, 246, 0.5)',
     borderRadius: 10,
     padding: 20,
     marginTop: 20,
+    shadowColor: '#000',
   },
   boardName: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
-  },
-  boardDescription: {
-    fontSize: 14,
-    color: '#555',
   },
   photoRow: {
     flexDirection: 'row',
@@ -405,6 +455,44 @@ const style = StyleSheet.create({
     fontSize: 12,
     color: '#777',
     marginTop: 5,
+  },
+  headerTxt: {
+    fontSize: 50,
+    fontWeight: '800',
+    fontFamily: 'montserrat',
+    color: '#fff',
+    textShadowColor: '#5856CB',
+    textShadowOffset: {width: 1, height: 5},
+    textShadowRadius: 10,
+    borderColor: '#C3CFFA',
+  },
+  boardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  editIconsContainer: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    flexDirection: 'row',
+  },
+  deleteIcon: {
+    backgroundColor: 'rgba(255, 0, 0, 0.8)',
+    borderRadius: 5,
+    padding: 5,
+    marginRight: 5,
+  },
+  cancelIcon: {
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: 5,
+    padding: 5,
+  },
+  iconText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
 });
 

@@ -8,10 +8,19 @@ import {
   TouchableOpacity,
   Dimensions,
   Alert,
+  Modal,
+  TextInput,
 } from 'react-native';
 import PhotoCard from '../components/PhotoCard';
 import {database} from '../utils/firebase';
-import {collection, getDocs, updateDoc, doc} from 'firebase/firestore';
+import {
+  collection,
+  getDocs,
+  updateDoc,
+  doc,
+  orderBy,
+  query,
+} from 'firebase/firestore';
 
 type Photo = {
   id: number;
@@ -31,7 +40,7 @@ type Board = {
 };
 
 const screenWidth = Dimensions.get('window').width;
-const spacing = 10;
+const spacing = 14;
 const numColumns = 2;
 const columnWidth = (screenWidth - spacing * (numColumns + 1)) / numColumns;
 
@@ -47,6 +56,11 @@ function BoardDetails({
   const [boards, setBoards] = useState<Board[]>([]);
   const [editMode, setEditMode] = useState(false);
   const [firstPhoto, setFirstPhoto] = useState<Photo | null>(null);
+  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const [editableBoardName, setEditableBoardName] = useState<string>('');
+  const [editableBoardDesc, setEditableBoardDesc] = useState<string>('');
 
   const boardId = route.params?.boardId;
   console.log(`Board ID: ${route.params?.boardId}`);
@@ -55,7 +69,9 @@ function BoardDetails({
   useEffect(() => {
     const fetchBoardsFromDB = async () => {
       try {
-        const querySnapshot = await getDocs(collection(database, 'boards'));
+        const querySnapshot = await getDocs(
+          query(collection(database, 'boards'), orderBy('createdAt', 'desc')),
+        );
         const boardsData: Board[] = querySnapshot.docs.map(doc => ({
           id: doc.id,
           name: doc.data().name,
@@ -125,6 +141,31 @@ function BoardDetails({
     ]);
   };
 
+  const handleUpdateBoard = async () => {
+    if (!board) return;
+
+    try {
+      const boardDocRef = doc(database, 'boards', board.id);
+      await updateDoc(boardDocRef, {
+        name: editableBoardName,
+        description: editableBoardDesc,
+      });
+
+      setBoards(prevBoards =>
+        prevBoards.map(b =>
+          b.id === board.id
+            ? {...b, name: editableBoardName, description: editableBoardDesc}
+            : b,
+        ),
+      );
+
+      setEditMode(false);
+      Alert.alert('Success', 'Board updated successfully!');
+    } catch (error) {
+      console.error('Error updating board:', error);
+    }
+  };
+
   // const firstPhoto = board?.photos?.[0];
 
   // function handleDeletePhoto(id: number) {
@@ -142,12 +183,16 @@ function BoardDetails({
       <TouchableOpacity
         onPress={() => {
           setEditMode(!editMode);
+          if (!editMode && board) {
+            setEditableBoardName(board.name);
+            setEditableBoardDesc(board.description);
+          }
         }}>
         <Text style={style.editText}>{editMode ? 'Done' : 'Edit'}</Text>
       </TouchableOpacity>
 
       {/* BoardDetails Section */}
-      {board ? (
+      {board && (
         <View style={style.userPf}>
           {firstPhoto && (
             <Image
@@ -156,12 +201,37 @@ function BoardDetails({
             />
           )}
           <View style={style.textContainer}>
-            <Text style={style.boardName}>{board.name}</Text>
-            <Text style={style.boardDesc}>{board.description}</Text>
+            {editMode ? (
+              <>
+                <TextInput
+                  style={style.inputField}
+                  value={editableBoardName}
+                  onChangeText={setEditableBoardName}
+                  placeholder="Edit board name"
+                  placeholderTextColor="#aaa"
+                />
+                <TextInput
+                  style={style.inputField}
+                  value={editableBoardDesc}
+                  onChangeText={setEditableBoardDesc}
+                  placeholder="Edit description"
+                  placeholderTextColor="#aaa"
+                  multiline
+                />
+                <TouchableOpacity
+                  style={style.updateButton}
+                  onPress={handleUpdateBoard}>
+                  <Text style={style.updateButtonText}>Update</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <Text style={style.headerTxt}>{board.name}</Text>
+                <Text style={style.boardDesc}>{board.description}</Text>
+              </>
+            )}
           </View>
         </View>
-      ) : (
-        <Text>Board</Text>
       )}
 
       {/* Content Section */}
@@ -171,20 +241,56 @@ function BoardDetails({
         {columns.map((columnPhotos, columnIndex) => (
           <View key={columnIndex} style={style.column}>
             {columnPhotos.map(photo => (
-              <TouchableOpacity
-                key={photo.id}
-                onPress={() => editMode && handleDeletePhoto(photo.id)}>
-                <PhotoCard
-                  key={photo.id}
-                  photo={photo}
-                  columnWidth={columnWidth}
-                  style={editMode ? style.editablePhoto : undefined}
-                />
-              </TouchableOpacity>
+              <View key={photo.id} style={style.photoContainer}>
+                <TouchableOpacity
+                  onPress={() => {
+                    if (editMode) return; // Ignore view functionality in Edit Mode
+                    setSelectedPhoto(photo);
+                    setIsModalVisible(true);
+                  }}>
+                  <PhotoCard
+                    photo={photo}
+                    columnWidth={columnWidth}
+                    style={editMode ? style.editablePhoto : undefined}
+                  />
+                </TouchableOpacity>
+
+                {/* Show Delete and Cancel Buttons in Edit Mode */}
+                {editMode && (
+                  <View style={style.editIconsContainer}>
+                    <TouchableOpacity
+                      style={style.deleteIcon}
+                      onPress={() => handleDeletePhoto(photo.id)}>
+                      <Text style={style.iconText}>Delete</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={style.cancelIcon}
+                      onPress={() => setEditMode(false)}>
+                      <Text style={style.iconText}>Cancel</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
             ))}
           </View>
         ))}
       </ScrollView>
+      {selectedPhoto && (
+        <Modal
+          visible={isModalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setIsModalVisible(false)}>
+          <TouchableOpacity
+            style={style.modalContainer}
+            onPress={() => setIsModalVisible(false)}>
+            <Image
+              source={{uri: selectedPhoto.src.original}}
+              style={style.modalImage}
+            />
+          </TouchableOpacity>
+        </Modal>
+      )}
     </View>
   );
 }
@@ -205,9 +311,9 @@ const style = StyleSheet.create({
   BoardDetailsBg: {
     flex: 1,
     backgroundColor: '#F79D7D',
+    paddingRight: 10,
   },
   userPf: {
-    flexDirection: 'row',
     alignItems: 'center',
     marginTop: 20,
     marginLeft: 20,
@@ -215,18 +321,18 @@ const style = StyleSheet.create({
   BoardDetailsImage: {
     width: 100,
     height: 100,
-    borderRadius: 20,
+    borderRadius: 50,
     marginRight: 10,
   },
-  BoardDetailsText: {
-    marginTop: 20,
-    marginLeft: 20,
-  },
   textContainer: {
-    marginTop: 30,
-    flexDirection: 'column',
+    marginTop: 0,
+    marginBottom: 20,
+    // flexDirection: 'column',
     justifyContent: 'center',
-    flex: 1,
+    // flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    textAlign: 'center',
   },
   boardName: {
     fontSize: 50,
@@ -240,9 +346,12 @@ const style = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'normal',
     color: '#F4F5F7',
-    textAlign: 'left',
-    marginBottom: 2,
-    lineHeight: 50,
+    textAlign: 'center',
+    marginBottom: 10,
+    alignContent: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
   },
 
   scrollContainer: {
@@ -289,19 +398,99 @@ const style = StyleSheet.create({
     padding: 20,
     marginTop: 20,
   },
-
   photoGrid: {
     marginTop: 20,
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     paddingHorizontal: spacing,
+    width: screenWidth,
+    paddingRight: 15,
   },
   column: {
     width: columnWidth,
   },
+  photoContainer: {
+    position: 'relative',
+  },
+
+  editIconsContainer: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    flexDirection: 'row',
+  },
+
+  deleteIcon: {
+    backgroundColor: 'rgba(255, 0, 0, 0.8)',
+    borderRadius: 5,
+    padding: 5,
+    marginRight: 5,
+  },
+
+  cancelIcon: {
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: 5,
+    padding: 5,
+  },
+
+  iconText: {
+    color: '#FFF',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  modalImage: {
+    resizeMode: 'contain',
+    width: '80%',
+    height: '80%',
+  },
+
   editablePhoto: {
     opacity: 0.5,
+  },
+  headerTxt: {
+    fontSize: 50,
+    fontWeight: '800',
+    fontFamily: 'montserrat',
+    color: '#fff',
+    textShadowColor: '#5856CB',
+    textShadowOffset: {width: 1, height: 5},
+    textShadowRadius: 10,
+    borderColor: '#C3CFFA',
+    marginBottom: 10,
+  },
+  inputField: {
+    width: '100%',
+    borderBottomWidth: 1,
+    borderColor: '#ccc',
+    marginVertical: 10,
+    fontSize: 18,
+    color: '#333',
+    paddingVertical: 5,
+    textAlign: 'center',
+  },
+
+  updateButton: {
+    backgroundColor: '#5856CB',
+    borderRadius: 5,
+    paddingVertical: 10,
+    paddingHorizontal: 15,
+    marginTop: 1,
+    alignSelf: 'center',
+  },
+
+  updateButtonText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
