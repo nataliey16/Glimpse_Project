@@ -16,6 +16,8 @@ import {
   getDocs,
   deleteDoc,
   doc,
+  query,
+  orderBy,
   // deleteField,
 } from 'firebase/firestore';
 import {useFocusEffect} from '@react-navigation/native';
@@ -56,10 +58,16 @@ function Profile({
   };
 
   const openDeleteModal = (boardId: string) => {
-    console.log('Open delete modal for modal id:', boardId);
-    setIsModalVisible(true);
-    setSelectedBoardId(boardId);
+    if (!isModalVisible) {
+      console.log('Open delete modal for modal id:', boardId);
+      setSelectedBoardId(boardId);
+      setIsModalVisible(true);
+    }
   };
+  //   console.log('Open delete modal for modal id:', boardId);
+  //   setIsModalVisible(true);
+  //   setSelectedBoardId(boardId);
+  // };
 
   const handleCancelModal = () => {
     setIsModalVisible(false);
@@ -67,73 +75,123 @@ function Profile({
 
   const handleDeleteModal = async (boardId: string) => {
     try {
+      console.log('Attempting to delete board with ID:', boardId);
       const boardDocRef = doc(database, 'boards', boardId);
       await deleteDoc(boardDocRef);
 
       console.log(`Delete board with id:${boardId}`);
 
-      setBoards(prevBoards => prevBoards.filter(board => board.id !== boardId));
+      setBoards(prevBoards => {
+        console.log('Current boards:', prevBoards);
+        const filteredBoards = prevBoards.filter(board => board.id !== boardId);
+        console.log('Boards after deletion:', filteredBoards);
+        return filteredBoards;
+      });
       setIsModalVisible(false);
     } catch (error) {
       console.error('Error deleting board:', error);
     }
   };
 
-  useEffect(() => {
-    if (route.params?.newSubmittedBoard) {
-      console.log('Received submitted board:', route.params.newSubmittedBoard);
-      setBoards(prevBoards => [...prevBoards, route.params.newSubmittedBoard]);
-      const fetchBoardsFromDB = async () => {
-        setIsLoading(true);
-        try {
-          const querySnapshot = await getDocs(collection(database, 'boards'));
-          const boardsData: Board[] = querySnapshot.docs.map(doc => ({
-            // id: doc.data().board_id,
-            id: doc.id,
-            name: doc.data().name,
-            description: doc.data().description,
-            photos: doc.data().photos,
-          }));
-          console.log('Fetched Boards:', boardsData);
-          setBoards(boardsData);
-        } catch (error) {
-          console.error('Error fetching boards:', error);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      fetchBoardsFromDB();
+  const fetchBoardsFromDB = async () => {
+    setIsLoading(true);
+    try {
+      const querySnapshot = await getDocs(
+        query(collection(database, 'boards'), orderBy('createdAt', 'desc')),
+      );
 
-      // Clear params to avoid re-triggering the effect
-      navigation.setParams({newSubmittedBoard: null});
+      const boardsData: Board[] = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        name: doc.data().name,
+        description: doc.data().description,
+        photos: doc.data().photos || [],
+      }));
+      console.log('Fetched Boards:', boardsData);
+      setBoards(boardsData);
+    } catch (error) {
+      console.error('Error fetching boards:', error);
+    } finally {
+      setIsLoading(false);
     }
-  }, [route.params?.newSubmittedBoard]);
+  };
 
   useFocusEffect(
     React.useCallback(() => {
-      const fetchBoardsFromDB = async () => {
-        setIsLoading(true);
-        try {
-          const querySnapshot = await getDocs(collection(database, 'boards'));
-          const boardsData: Board[] = querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            // id: doc.data().board_id,
-            name: doc.data().name,
-            description: doc.data().description,
-            photos: doc.data().photos,
-          }));
-          console.log('useFocusEffect Fetched Boards:', boardsData);
-          setBoards(boardsData);
-        } catch (error) {
-          console.error('Error fetching boards:', error);
-        } finally {
-          setIsLoading(false);
+      const fetchData = async () => {
+        if (route.params?.newSubmittedBoard) {
+          console.log(
+            'Received submitted board:',
+            route.params.newSubmittedBoard,
+          );
+          setBoards(prevBoards => [
+            route.params.newSubmittedBoard,
+            ...prevBoards,
+          ]);
+          navigation.setParams({newSubmittedBoard: null}); // Clear params
+        } else {
+          await fetchBoardsFromDB(); // Regular fetch when screen focuses
         }
       };
-      // fetchBoardsFromDB();
-      setTimeout(fetchBoardsFromDB, 3000);
-    }, []),
+
+      fetchData();
+    }, [route.params?.newSubmittedBoard]),
   );
+
+  // useEffect(() => {
+  //   if (route.params?.newSubmittedBoard) {
+  //     console.log('Received submitted board:', route.params.newSubmittedBoard);
+  //     setBoards(prevBoards => [...prevBoards, route.params.newSubmittedBoard]);
+  //     const fetchBoardsFromDB = async () => {
+  //       setIsLoading(true);
+  //       try {
+  //         const querySnapshot = await getDocs(collection(database, 'boards'));
+  //         const boardsData: Board[] = querySnapshot.docs.map(doc => ({
+  //           // id: doc.data().board_id,
+  //           id: doc.id,
+  //           name: doc.data().name,
+  //           description: doc.data().description,
+  //           photos: doc.data().photos,
+  //         }));
+  //         console.log('Fetched Boards:', boardsData);
+  //         setBoards(boardsData);
+  //       } catch (error) {
+  //         console.error('Error fetching boards:', error);
+  //       } finally {
+  //         setIsLoading(false);
+  //       }
+  //     };
+  //     fetchBoardsFromDB();
+
+  //     // Clear params to avoid re-triggering the effect
+  //     navigation.setParams({newSubmittedBoard: null});
+  //   }
+  // }, [route.params?.newSubmittedBoard]);
+
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     const fetchBoardsFromDB = async () => {
+  //       setIsLoading(true);
+  //       try {
+  //         const querySnapshot = await getDocs(collection(database, 'boards'));
+  //         const boardsData: Board[] = querySnapshot.docs.map(doc => ({
+  //           id: doc.id,
+  //           // id: doc.data().board_id,
+  //           name: doc.data().name,
+  //           description: doc.data().description,
+  //           photos: doc.data().photos,
+  //         }));
+  //         console.log('useFocusEffect Fetched Boards:', boardsData);
+  //         setBoards(boardsData);
+  //       } catch (error) {
+  //         console.error('Error fetching boards:', error);
+  //       } finally {
+  //         setIsLoading(false);
+  //       }
+  //     };
+  //     // fetchBoardsFromDB();
+  //     setTimeout(fetchBoardsFromDB, 3000);
+  //   }, []),
+  // );
 
   return (
     <View style={style.profileBg}>
@@ -161,7 +219,7 @@ function Profile({
         <Text style={style.longContent}>
           Your ideas, moods, and dreams all in one place.
         </Text>
-        <Text style={style.moodTxt}>Mood Board</Text>
+        {/* <Text style={style.moodTxt}>Mood Board</Text> */}
       </View>
 
       {/* Loading Indicator */}
@@ -232,11 +290,13 @@ function Profile({
                   </View>
                 </View>
 
-                {isModalVisible && selectedBoardId && (
+                {isModalVisible && (
                   <DeleteModal
                     handleCancelModal={handleCancelModal}
-                    handleDeleteModal={handleDeleteModal}
-                    boardId={board.id}
+                    handleDeleteModal={() =>
+                      handleDeleteModal(selectedBoardId!)
+                    }
+                    boardId={selectedBoardId!}
                   />
                 )}
               </Pressable>

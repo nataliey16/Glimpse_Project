@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {collection, addDoc} from 'firebase/firestore';
+import {collection, addDoc, serverTimestamp} from 'firebase/firestore';
 import {database} from '../utils/firebase';
 import {
   View,
@@ -8,12 +8,14 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
+import BoardDetails from './BoardDetails';
 
 type Board = {
   id: string;
   name: string;
   description: string;
   photos: Photo[] | null;
+  createdAt: any;
 };
 
 type Photo = {
@@ -33,10 +35,13 @@ function CreateBoard({
   route: any;
   navigation: any;
 }): React.JSX.Element {
+  const {selectedPhoto} = route.params || {};
   const [boardForm, setBoardForm] = useState({
     name: '',
     description: '',
+    photo: [{selectedPhoto}],
   });
+  console.log('Selected Photo:', selectedPhoto);
 
   const handleInputChange = (name: string, value: string) => {
     console.log(
@@ -47,43 +52,52 @@ function CreateBoard({
     );
   };
 
-  const addBoardData = async (board: Board) => {
-    try {
-      //references the board in the boards tables within the database
-      const boardRef = await addDoc(collection(database, 'boards'), {
-        board_id: board.id,
-        name: board.name,
-        description: board.description,
-        photos: board.photos,
-      });
+  // const addBoardData = async (board: Board) => {
+  //   try {
+  //     //references the board in the boards tables within the database
+  //     const boardRef = await addDoc(collection(database, 'boards'), {
+  //       board_id: board.id,
+  //       name: board.name,
+  //       description: board.description,
+  //       photos: board.photos,
+  //       createdAt: serverTimestamp(),
+  //     });
 
-      console.log('Board written to database', boardRef);
-      console.log('Board written to database with ID:', boardRef.id);
-    } catch (error) {
-      console.error('Error adding document: ', error);
-    }
-  };
-  const handleSubmit = async () => {
+  //     console.log('Board written to database', boardRef);
+  //     console.log('Board written to database with ID:', boardRef.id);
+  //   } catch (error) {
+  //     console.error('Error adding document: ', error);
+  //   }
+  // };
+
+  const handleSubmit = async (board: Board) => {
     if (!boardForm.name.trim() || !boardForm.description.trim()) {
       console.log('Board name and description are required');
       return;
     }
-
-    const boardWithId: Board = {
-      id: '',
-      name: boardForm.name,
-      description: boardForm.description,
-      photos: [], // Initialize with an empty photos array
-    };
-
     try {
-      await addBoardData(boardWithId); // Save to database
-      console.log('Board successfully added to database');
+      const newBoard: Board = {
+        ...board,
+        id: '',
+        name: boardForm.name,
+        description: boardForm.description,
+        photos: selectedPhoto ? [selectedPhoto] : [],
+        createdAt: serverTimestamp(),
+      };
+      const boardRef = await addDoc(collection(database, 'boards'), {
+        name: newBoard.name,
+        description: newBoard.description,
+        photos: newBoard.photos,
+        createdAt: serverTimestamp(), // Add creation time
+      });
+      console.log('Board successfully added with ID:', boardRef.id);
+      newBoard.id = boardRef.id;
+
       navigation.navigate('Profile', {
         screen: 'MyProfile',
-        params: {newSubmittedBoard: boardWithId},
+        params: {newSubmittedBoard: newBoard},
       });
-      setBoardForm({name: '', description: ''}); // Reset form
+      setBoardForm({name: '', description: '', photo: [{selectedPhoto}]});
     } catch (error) {
       console.error('Error while submitting board:', error);
     }
@@ -130,14 +144,24 @@ function CreateBoard({
         <TouchableOpacity
           style={style.submitBtn}
           onPress={() => {
-            setBoardForm({name: '', description: ''});
+            setBoardForm({name: '', description: '', photo: [{selectedPhoto}]});
             navigation.goBack();
           }}>
           <Text style={style.submitBtnTxt}>Cancel</Text>
         </TouchableOpacity>
 
         {/* Create Button */}
-        <TouchableOpacity style={style.submitBtn} onPress={handleSubmit}>
+        <TouchableOpacity
+          style={style.submitBtn}
+          onPress={() =>
+            handleSubmit({
+              id: '',
+              name: boardForm.name,
+              description: boardForm.description,
+              photos: selectedPhoto ? [selectedPhoto] : [],
+              createdAt: serverTimestamp(),
+            })
+          }>
           <Text style={style.submitBtnTxt}>Create</Text>
         </TouchableOpacity>
       </View>

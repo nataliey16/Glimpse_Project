@@ -13,7 +13,14 @@ import {
 } from 'react-native';
 import PhotoCard from '../components/PhotoCard';
 import {database} from '../utils/firebase';
-import {collection, getDocs, updateDoc, doc} from 'firebase/firestore';
+import {
+  collection,
+  getDocs,
+  updateDoc,
+  doc,
+  orderBy,
+  query,
+} from 'firebase/firestore';
 
 type Photo = {
   id: number;
@@ -33,7 +40,7 @@ type Board = {
 };
 
 const screenWidth = Dimensions.get('window').width;
-const spacing = 10;
+const spacing = 14;
 const numColumns = 2;
 const columnWidth = (screenWidth - spacing * (numColumns + 1)) / numColumns;
 
@@ -62,7 +69,9 @@ function BoardDetails({
   useEffect(() => {
     const fetchBoardsFromDB = async () => {
       try {
-        const querySnapshot = await getDocs(collection(database, 'boards'));
+        const querySnapshot = await getDocs(
+          query(collection(database, 'boards'), orderBy('createdAt', 'desc')),
+        );
         const boardsData: Board[] = querySnapshot.docs.map(doc => ({
           id: doc.id,
           name: doc.data().name,
@@ -302,6 +311,7 @@ const style = StyleSheet.create({
   BoardDetailsBg: {
     flex: 1,
     backgroundColor: '#F79D7D',
+    paddingRight: 10,
   },
   userPf: {
     alignItems: 'center',
@@ -322,6 +332,7 @@ const style = StyleSheet.create({
     // flex: 1,
     alignItems: 'center',
     paddingHorizontal: 20,
+    textAlign: 'center',
   },
   boardName: {
     fontSize: 50,
@@ -393,6 +404,8 @@ const style = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     paddingHorizontal: spacing,
+    width: screenWidth,
+    paddingRight: 15,
   },
   column: {
     width: columnWidth,
@@ -453,7 +466,6 @@ const style = StyleSheet.create({
     textShadowRadius: 10,
     borderColor: '#C3CFFA',
     marginBottom: 10,
-    marginRight: 'auto',
   },
   inputField: {
     width: '100%',

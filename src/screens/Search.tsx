@@ -146,10 +146,12 @@ const SearchScreen = ({navigation}: {navigation: any}) => {
 
   const handleCreateNewBoard = () => {
     console.log('Create New Board');
+    console.log('Selected Photo:', selectedPhoto);
     setShowBoardOptions(false);
     closePhotoModal();
     navigation.navigate('Create Board', {
       screen: 'CreateBoard',
+      selectedPhoto: selectedPhoto,
     });
   };
 

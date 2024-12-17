@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {
   Modal,
   Text,
@@ -28,7 +28,7 @@ function DeleteModal(props: DeleteModalProps): React.JSX.Element {
             Are you sure you want to delete board?
           </Text>
         </View>
-        <View style={[style.editButtonView]}>
+        <View style={style.buttonContainer}>
           <TouchableOpacity
             style={[style.editButton, style.cancelButton]}
             onPress={handleCancelModal}>
@@ -55,13 +55,14 @@ const style = StyleSheet.create({
   modalContent: {
     justifyContent: 'center',
     width: width * 0.8,
-    height: height * 0.7,
+    height: height * 0.4,
     padding: 20,
     backgroundColor: '#C3CFFA',
     borderRadius: 20,
+    alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 35,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#FFFFFF',
     marginBottom: 20,
@@ -70,13 +71,18 @@ const style = StyleSheet.create({
   editButtonView: {
     justifyContent: 'space-between',
   },
-
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    width: '100%',
+  },
   editButton: {
     backgroundColor: '#FFFFFF',
     borderRadius: 10,
     padding: 5,
     marginHorizontal: 70,
-    marginBottom: 10,
+    marginBottom: 50,
   },
   deleteButton: {
     position: 'absolute',
