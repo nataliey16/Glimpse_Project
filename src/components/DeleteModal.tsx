@@ -14,10 +14,16 @@ interface DeleteModalProps {
   handleCancelModal: () => void;
   handleDeleteModal: (boardId: string) => void;
   boardId: string;
+  boardName: string;
 }
 
-function DeleteModal(props: DeleteModalProps): React.JSX.Element {
-  const {handleCancelModal, handleDeleteModal, boardId} = props;
+function DeleteModal({
+  handleCancelModal,
+  handleDeleteModal,
+  boardId,
+  boardName, // Destructure the new prop
+}: DeleteModalProps): React.JSX.Element {
+  // const {handleCancelModal, handleDeleteModal, boardId} = props;
 
   return (
     <Modal visible={true} transparent={true} animationType="slide">
@@ -25,7 +31,7 @@ function DeleteModal(props: DeleteModalProps): React.JSX.Element {
         <View style={style.modalContent}>
           <Text style={style.modalTitle}>
             {' '}
-            Are you sure you want to delete board?
+            Are you sure you want to delete "{boardName}"?
           </Text>
         </View>
         <View style={style.buttonContainer}>
