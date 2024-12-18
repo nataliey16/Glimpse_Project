@@ -52,15 +52,18 @@ function Profile({
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedBoardId, setSelectedBoardId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedBoardName, setSelectedBoardName] = useState<string | null>(
+    null,
+  );
 
   const handleEdit = () => {
     setEditBoard(true);
   };
 
-  const openDeleteModal = (boardId: string) => {
-    if (!isModalVisible) {
+  const openDeleteModal = (boardId: string, boardName: string) => {    if (!isModalVisible) {
       console.log('Open delete modal for modal id:', boardId);
       setSelectedBoardId(boardId);
+      setSelectedBoardName(boardName);
       setIsModalVisible(true);
     }
   };
@@ -264,7 +267,7 @@ function Profile({
                       <View style={style.editIconsContainer}>
                         <TouchableOpacity
                           style={style.deleteIcon}
-                          onPress={() => openDeleteModal(board.id)}>
+                          onPress={() => openDeleteModal(board.id, board.name)}>
                           <Text style={style.iconText}>Delete</Text>
                         </TouchableOpacity>
                         <TouchableOpacity
@@ -297,6 +300,7 @@ function Profile({
                       handleDeleteModal(selectedBoardId!)
                     }
                     boardId={selectedBoardId!}
+                    boardName={selectedBoardName!}
                   />
                 )}
               </Pressable>
