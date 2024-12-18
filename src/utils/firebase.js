@@ -1,21 +1,25 @@
 import {initializeApp} from 'firebase/app';
 import {getFirestore} from 'firebase/firestore';
+import {
+  FIREBASE_API_KEY,
+  FIREBASE_AUTH_DOMAIN,
+  FIREBASE_PROJECT_ID,
+  FIREBASE_STORAGE_BUCKET,
+  FIREBASE_MESSAGING_SENDER_ID,
+  FIREBASE_APP_ID,
+} from 'react-native-dotenv';
 
-// TODO: Replace the following with your app's Firebase project configuration
-// See: https://support.google.com/firebase/answer/7015592
+// Firebase configuration
 const firebaseConfig = {
-  apiKey: 'AIzaSyD_8MEB0kDHCzgX27vaGKDUZRaGpJQ-Aew',
-  authDomain: 'glimpse-mobile-93741.firebaseapp.com',
-  projectId: 'glimpse-mobile-93741',
-  storageBucket: 'glimpse-mobile-93741.firebasestorage.app',
-  messagingSenderId: '1008117957425',
-  appId: '1:1008117957425:web:a30f4a8c9e73bc226c6610',
+  apiKey: FIREBASE_API_KEY,
+  authDomain: FIREBASE_AUTH_DOMAIN,
+  projectId: FIREBASE_PROJECT_ID,
+  storageBucket: FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: FIREBASE_MESSAGING_SENDER_ID,
+  appId: FIREBASE_APP_ID,
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Initialize Cloud Firestore and get a reference to the service
 const database = getFirestore(app);
 
 export {database};
